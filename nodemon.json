@@ -1,0 +1,7 @@
+{
+  "ext": "js,json,styl",
+  "events": {
+    "start": "stylus assets/stylesheets/style.styl --out public/stylesheets --use ./node_modules/nib/lib/nib --include-css --compress --watch",
+    "restart": "stylus assets/stylesheets/style.styl --out public/stylesheets --use ./node_modules/nib/lib/nib --include-css --compress --watch"
+  }
+}

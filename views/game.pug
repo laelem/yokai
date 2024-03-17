@@ -1,0 +1,22 @@
+extends layout
+
+block content
+  #main.container
+    header#header.text-center.py-3.border-bottom
+      h1.display-1= __('app.name')
+    section#gameboard.d-table(style={
+      width: (xNbTile * tileSize) + 'px',
+      height: (yNbTile * tileSize) + 'px'
+    })
+      - for (var y = 0; y < yNbTile; ++y)
+        .d-table-row
+          - for (var x = 0; x < xNbTile; ++x)
+            .tile.d-table-cell(style={
+              width: tileSize + 'px',
+              height: tileSize + 'px'
+            })
+              .cell(style={
+                width: (tileSize - 2) + 'px',
+                height: (tileSize - 2) + 'px'
+              })
+                include svg/blank_shogi_piece.pug
