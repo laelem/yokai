@@ -1,0 +1,60 @@
+svg(
+  xmlns='http://www.w3.org/2000/svg'
+  width=tileSize
+  height=tileSize
+  viewbox='0 0 100 100'
+  id=piece.id
+  class=(piece.opponent ? 'opponent' : '') + ' ' + (piece.promoted ? 'promoted' : '') + ' ' + piece.type + ' piece'
+)
+  path(
+    stroke=piece.color
+    stroke-width='1.3'
+    stroke-linecap='round'
+    stroke-linejoin='round'
+    stroke-miterlimit='4'
+    stroke-dasharray='none'
+    stroke-opacity='1'
+    fill='#ECDCC4'
+    d='M 50 15, 75 23, 85 85, 15 85, 25 23, Z'
+  )
+  rect(
+    x='32.5'
+    y='35'
+    width='35'
+    height='35'
+    fill='transparent'
+    stroke=piece.color
+    stroke-width='0.5'
+  )
+  svg.promotion-sign(
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    fill=piece.color
+    class="bi bi-bookmark-star"
+    viewBox="0 0 16 16"
+    x=42
+    y=45
+  )
+    path(d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708")
+  -
+    let moves = [
+      ['top', '50', '35'],
+      ['top-right', '67.7', '35'],
+      ['right', '67.5', '52.5'],
+      ['bottom-right', '67.5', '70'],
+      ['bottom', '50', '70'],
+      ['bottom-left', '32.5', '70'],
+      ['left', '32.5', '52.5'],
+      ['top-left', '32.5', '35'],
+    ]
+  each move in moves
+    - let classList = 'move ' + move[0] + (piece.moves.includes(move[0]) ? ' enabled' : ' disabled')
+    - classList += piece.promotedMoves.includes(move[0]) ? ' enabledIfPromoted' : ' disabledIfPromoted'
+    circle(
+      class=classList
+      cx=move[1]
+      cy=move[2]
+      r='3'
+      fill=piece.color
+    )

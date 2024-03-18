@@ -15,8 +15,13 @@ block content
               width: tileSize + 'px',
               height: tileSize + 'px'
             })
-              .cell(style={
-                width: (tileSize - 2) + 'px',
-                height: (tileSize - 2) + 'px'
-              })
-                include svg/blank_shogi_piece.pug
+              div(
+                class='cell ' + (y>0 && y<3 ? 'river' : '') + ' cell-' + x + '-' + y,
+                style={
+                  width: (tileSize - 2) + 'px',
+                  height: (tileSize - 2) + 'px'
+                }
+              )
+                - let piece = boardGame.state['pos' + x + '_' + y]
+                - if (piece)
+                  include piece.pug

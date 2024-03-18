@@ -33,3 +33,11 @@ const socket = io();
 //     window.scrollTo(0, document.body.scrollHeight);
 //     socket.auth.serverOffset = serverOffset;
 // });
+
+//
+// const p1 = document.getElementById('kodama-2')
+// p1.addEventListener('click', function(e) {
+//     e.preventDefault()
+//     console.log('ok')
+//     p1.classList.remove("opponent");
+// })

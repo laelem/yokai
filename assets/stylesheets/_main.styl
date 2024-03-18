@@ -1,7 +1,27 @@
 #gameboard
   margin 100px auto
   .cell
-    background-color #F9BB64
+    background-color #b5cd83
     margin 1px
-  svg
+    &.river
+      background-color #99c9e9
+  .piece
+    display block
     margin auto
+    &.opponent
+      transform-origin 50% 50%
+      transform scale(1,-1)
+    & .promotion-sign
+      display none
+    &.promoted .promotion-sign
+      display block
+    .move.enabled
+      display block
+    .move.disabled
+      display none
+    &.promoted .move.enabledIfPromoted
+      display block
+    &.promoted .move.disabledIfPromoted
+      display none
+
+
