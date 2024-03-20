@@ -4,13 +4,13 @@ block content
   #main.container
     header#header.text-center.py-3.border-bottom
       h1.display-1= __('app.name')
-    section#gameboard.d-table(style={
+    section#board-game.d-table(style={
       width: (xNbTile * tileSize) + 'px',
       height: (yNbTile * tileSize) + 'px'
     })
-      - for (var y = 0; y < yNbTile; ++y)
+      - for (var y = 0, y2 = yNbTile-1; y < yNbTile; ++y, --y2)
         .d-table-row
-          - for (var x = 0; x < xNbTile; ++x)
+          - for (var x = 0, x2 = xNbTile-1; x < xNbTile; ++x, --x2)
             .tile.d-table-cell(style={
               width: tileSize + 'px',
               height: tileSize + 'px'
@@ -24,4 +24,9 @@ block content
               )
                 - let piece = boardGame.state['pos' + x + '_' + y]
                 - if (piece)
+                  - let player = 'p1'
+                  include piece.pug
+                - piece = boardGame.state['pos' + x2 + '_' + y2]
+                - if (piece)
+                  - let player = 'p2'
                   include piece.pug

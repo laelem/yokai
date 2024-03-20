@@ -1,10 +1,54 @@
-#gameboard
+#board-game
   margin 100px auto
   .cell
     background-color #b5cd83
     margin 1px
     &.river
       background-color #99c9e9
+
+  // design général d'une pièce
+  .piece
+    .outline
+      fill #ECDCC4
+      stroke-width 1.3
+      stroke-linecap round
+      stroke-linejoin round
+      stroke-miterlimit 4
+      stroke-dasharray none
+      stroke-opacity 1
+    .frame
+      stroke-width 0.5
+      fill transparent
+    &.kodama
+      &.selected .outline
+        fill kodama_color + 90%
+      .outline, .frame
+        stroke kodama_color
+      .move, .promotion-sign
+        fill kodama_color
+    &.koropokkuru
+      &.selected .outline
+        fill koropokkuru_color + 90%
+      .outline, .frame
+        stroke koropokkuru_color
+      .move, .promotion-sign
+        fill koropokkuru_color
+    &.tanuki
+      &.selected .outline
+        fill tanuki_color + 90%
+      .outline, .frame
+        stroke tanuki_color
+      .move, .promotion-sign
+        fill tanuki_color
+    &.kitsune
+      &.selected .outline
+        fill kitsune_color + 90%
+      .outline, .frame
+        stroke kitsune_color
+      .move, .promotion-sign
+        fill kitsune_color
+
+  // design d'une pièce selon son état
   .piece
     display block
     margin auto
@@ -23,5 +67,7 @@
       display block
     &.promoted .move.disabledIfPromoted
       display none
+
+
 
 

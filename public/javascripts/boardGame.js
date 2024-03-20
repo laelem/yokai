@@ -1,16 +1,16 @@
 const Piece = require("./piece");
 
-class boardGame {
+class BoardGame {
     constructor() {
         this.pieces = [
-            new Piece('koropokkuru-1', 'koropokkuru', false, false, 1, 3),
-            new Piece('kitsune-1', 'kitsune', false, false, 0, 3),
-            new Piece('tanuki-1', 'tanuki', false, false, 2, 3),
-            new Piece('kodama-1', 'kodama', false, true, 1, 2),
-            new Piece('koropokkuru-2', 'koropokkuru', true, false, 1, 0),
-            new Piece('kitsune-2', 'kitsune', true, false, 2, 0),
-            new Piece('tanuki-2', 'tanuki', true, false, 0, 0),
-            new Piece('kodama-2', 'kodama', true, false, 1, 1),
+            new Piece('koropokkuru-1', 'koropokkuru', 'p1', false, 1, 3),
+            new Piece('kitsune-1', 'kitsune', 'p1', false, 0, 3),
+            new Piece('tanuki-1', 'tanuki', 'p1', false, 2, 3),
+            new Piece('kodama-1', 'kodama', 'p1', true, 1, 2),
+            new Piece('koropokkuru-2', 'koropokkuru', 'p2', false, 1, 0),
+            new Piece('kitsune-2', 'kitsune', 'p2', false, 2, 0),
+            new Piece('tanuki-2', 'tanuki', 'p2', false, 0, 0),
+            new Piece('kodama-2', 'kodama', 'p2', false, 1, 1),
         ]
         this.state = {}
         this.display()
@@ -23,4 +23,4 @@ class boardGame {
     }
 }
 
-module.exports = boardGame
+module.exports = BoardGame

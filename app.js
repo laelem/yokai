@@ -5,10 +5,9 @@ const {Server} = require('socket.io')
 const io = new Server(server)
 const path = require('path')
 const createError = require('http-errors')
-const stylus = require('stylus')
-const nib = require('nib')
 const i18n = require("i18n")
 const indexRouter = require('./routes/index')
+const socketsManagement = require('./sockets/sockets')
 
 const port = process.env.PORT || 8080
 
@@ -27,22 +26,11 @@ i18n.configure({
 
 app.use(i18n.init)
 
-
-
-io.on('connection', (socket) => {
-    console.log('user connected')
-    socket.on('disconnect', function () {
-        console.log('user disconnected')
-    })
-})
+socketsManagement.start(io)
 
 server.listen(port, function() {
     console.log(`Listening on port ${port}`)
 })
-
-
-
-
 
 app.use('/', indexRouter)
 

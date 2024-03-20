@@ -26,18 +26,16 @@ const socket = io();
 //     }
 // });
 //
-// socket.on('chat message', (msg, serverOffset) => {
-//     const item = document.createElement('li');
-//     item.textContent = msg;
-//     messages.appendChild(item);
-//     window.scrollTo(0, document.body.scrollHeight);
-//     socket.auth.serverOffset = serverOffset;
-// });
+socket.on('user-connect', (player, opponent) => {
+    console.log(player, opponent)
+    document.querySelectorAll('.piece.' + opponent).forEach((piece) => {
+        piece.remove()
+    });
+});
 
-//
-// const p1 = document.getElementById('kodama-2')
-// p1.addEventListener('click', function(e) {
-//     e.preventDefault()
-//     console.log('ok')
-//     p1.classList.remove("opponent");
-// })
+document.querySelectorAll('.piece').forEach((piece) => {
+    piece.addEventListener('click', (e) => {
+        document.querySelectorAll('.piece').forEach((other) => other.classList.remove('selected'))
+        e.currentTarget.classList.add('selected')
+    });
+});
