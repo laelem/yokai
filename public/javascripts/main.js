@@ -26,11 +26,29 @@ const socket = io();
 //     }
 // });
 //
-socket.on('user-connect', (player, opponent) => {
-    console.log(player, opponent)
-    document.querySelectorAll('.piece.' + opponent).forEach((piece) => {
+socket.on('welcome', (gameList) => {
+    console.log('welcome')
+    let chooseGameElement = document.getElementById('choose-game')
+
+    gameList.forEach(function (game) {
+        let test = document.getElementById('join-button-template')
+        console.log(test)
+        let button = test.cloneNode(true)
+        button.removeAttribute('id')
+        button.querySelector('.number').textContent = game.number
+        button.style.display = 'block'
+        chooseGameElement.firstChild.appendChild(button)
+    })
+
+    chooseGameElement.style.display = 'block'
+});
+
+socket.on('new-game', (game) => {
+    console.log('new-game')
+    document.querySelectorAll('.piece.' + game.player2Id).forEach((piece) => {
         piece.remove()
     });
+    document.getElementById('board-game-container').style.display = 'block'
 });
 
 document.querySelectorAll('.piece').forEach((piece) => {

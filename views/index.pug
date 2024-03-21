@@ -3,9 +3,35 @@ extends layout
 block content
   #main.container
     header#header.text-center.py-3.border-bottom
-      h1.display-1= __('app.name')
-    .row.mt-4.pt-4
+      h1.display-3= __('app.name')
+    #choose-game.row.mt-4.pt-4
       .d-grid.gap-3.col-4.mx-auto
         button.btn.btn-lg.btn-primary(type="button") Nouvelle partie
-        button.btn.btn-lg.btn-outline-secondary(type="button") Rejoindre la partie 1
-        button.btn.btn-lg.btn-outline-secondary(type="button") Rejoindre la partie 2
+        button#join-button-template.join.btn.btn-lg.btn-outline-secondary(type="button") Rejoindre la partie <span class="number"></span>
+    #board-game-container.row
+      section#board-game.d-table(style={
+        width: (xNbTile * tileSize) + 'px',
+        height: (yNbTile * tileSize) + 'px'
+      })
+        - for (var y = 0, y2 = yNbTile-1; y < yNbTile; ++y, --y2)
+          .d-table-row
+            - for (var x = 0, x2 = xNbTile-1; x < xNbTile; ++x, --x2)
+              .tile.d-table-cell(style={
+                width: tileSize + 'px',
+                height: tileSize + 'px'
+              })
+                div(
+                  class='cell ' + (y > 0 && y < 3 ? 'river' : '') + ' cell-' + x + '-' + y,
+                  style={
+                    width: (tileSize - 2) + 'px',
+                    height: (tileSize - 2) + 'px'
+                  }
+                )
+                  - let piece = boardGame.state['pos' + x + '_' + y]
+                  - if (piece)
+                    - let player = 'p1'
+                    include piece.pug
+                  - piece = boardGame.state['pos' + x2 + '_' + y2]
+                  - if (piece)
+                    - let player = 'p2'
+                    include piece.pug
