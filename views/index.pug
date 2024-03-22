@@ -6,7 +6,7 @@ block content
       h1.display-3= __('app.name')
     #choose-game.row.mt-4.pt-4
       .d-grid.gap-3.col-4.mx-auto
-        button.btn.btn-lg.btn-primary(type="button") Nouvelle partie
+        button#new-game.btn.btn-lg.btn-primary(type="button") Nouvelle partie
         button#join-button-template.join.btn.btn-lg.btn-outline-secondary(type="button") Rejoindre la partie <span class="number"></span>
     #board-game-container.row
       section#board-game.d-table(style={

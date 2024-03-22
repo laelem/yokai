@@ -8,37 +8,47 @@ exports.start = (io) => {
     io.on('connection', (socket) => {
         if (data.gameList.length === 0) {
             let game = new Game()
+            data.gameList.push(game)
+            socket.join(game.id)
+            socket.emit('first-user-connected', game)
+        } else {
+            let availableGameList = data.gameList.filter(function (game) { return game.playerList.length === 1 })
+            socket.emit('user-connected', availableGameList)
+        }
+
+        socket.on('new-game-requested', function() {
+            // recherche d'un numéro de partie disponible
+            let numberList = data.gameList.map((game) => game.number)
+            let number = 2
+            while(numberList.includes(number)) { number++ }
+            let game = new Game(number)
             console.log('new-game ' + game.number);
             data.gameList.push(game)
-            socket.join(game.room)
-            socket.emit('new-game', game)
-        } else {
-            console.log('welcome');
-            let activeGameList = data.gameList.filter(function (game) { return game.playerList.length === 1 })
-            socket.emit('welcome', activeGameList)
-        }
-        // let player = 'p1'
-        // let opponent = 'p2'
-        // if (data.playersList.length > 0) {
-        //     player = 'p2'
-        //     opponent = 'p1'
-        // }
-        // console.log('user connected : ' + player)
-        // data.playersList.push(player)
-        // socket.emit('user-connect', player, opponent)
+            socket.join(game.id)
+            socket.emit('new-game-joined', game)
+            socket.broadcast.emit('new-game-created', game)
+        })
+
+        socket.on('join-game-requested', function(gameId) {
+            let game = data.gameList.find((game) => game.id === gameId)
+            game.join()
+            console.log('join-game ' + game.number);
+            socket.join(game.id)
+            socket.emit('game-joined', game)
+            socket.broadcast.emit('game-full', game)
+            socket.to(game).emit('other-player-joined')
+        })
 
         socket.on('disconnecting', function () {
-            console.log(data.gameList)
-            console.log(socket.rooms)
+            console.log('disconnect')
             let rooms = socket.rooms
             rooms.forEach(function (room) {
-                let gameIndex = data.gameList.findIndex((game) => game.room === room)
+                let gameIndex = data.gameList.findIndex((game) => game.id === room)
                 if (gameIndex !== -1) {
-                    console.log('user disconnected from game : ' + room)
+                    console.log('user disconnected from game : ' + id)
                     data.gameList.splice(gameIndex, 1)
                 }
             })
-            console.log(data.gameList)
         })
     })
 }
