@@ -1,17 +1,14 @@
 const socket = io()
 
-// Premier utilisateur connecté : affichage direct du plateau de jeu de la première partie
-socket.on('first-user-connected', (game) => {
-    console.log('first-user-connected')
-    document.querySelectorAll('.piece.' + game.player2Id).forEach((piece) => {
-        piece.remove()
-    })
-    document.querySelector('#board-game-container').style.display = 'block'
+// Connexion d'un nouvel utilisateur
+socket.on('user-connected', (user) => {
+    console.log('user connected : ' + user.pseudo)
+    document.querySelector('#user-panel .pseudo').textContent = user.pseudo
 })
 
-// Connexion d'un utilisateur : affichage des parties disponibles
-socket.on('user-connected', (gameList) => {
-    console.log('user-connected')
+// Affichage des parties disponibles à l'arrivée d'un nouvel utilisateur
+socket.on('games-available', (gameList) => {
+    console.log('games-available')
     let chooseGameElement = document.querySelector('#choose-game')
 
     gameList.forEach(function (game) {
@@ -35,11 +32,12 @@ document.querySelector('#new-game').addEventListener('click', (e) => {
 // Un utilisateur rejoint une nouvelle partie : affichage du plateau
 socket.on('new-game-joined', (game) => {
     console.log('new-game-joined: ' + game.number)
-    document.querySelectorAll('.piece.' + game.player2Id).forEach((piece) => {
+    document.querySelectorAll('.piece.p2').forEach((piece) => {
         piece.remove()
     })
     document.querySelector('#choose-game').style.display = 'none'
-    document.querySelector('#board-game-container').style.display = 'block'
+    document.querySelector('#main-container').style.display = 'flex'
+    document.querySelector('#news .waiting-user').style.display = 'block'
 })
 
 // Nouvelle partie créée, affichage de la partie dans la liste des parties disponibles
@@ -63,24 +61,51 @@ document.querySelector('#choose-game').addEventListener('click', (e) => {
 })
 
 // Un utilisateur rejoint une partie existante : affichage du plateau
-socket.on('game-joined', (game) => {
-    console.log('game-joined: ' + game.number)
-    document.querySelectorAll('.piece.' + game.player1Id).forEach((piece) => {
+socket.on('game-joined', (opponent, firstPlayer) => {
+    console.log(firstPlayer)
+    document.querySelectorAll('.piece.p1').forEach((piece) => {
         piece.remove()
     })
     document.querySelector('#choose-game').style.display = 'none'
-    document.querySelector('#board-game-container').style.display = 'block'
+    document.querySelector('#news .opponent .player').textContent = opponent.pseudo
+    document.querySelector('#news .opponent').style.display = 'block'
+    document.querySelector('#news ' + (firstPlayer ? '.i-start' : '.other-start')).style.display = 'block'
+    if (!firstPlayer) {
+        document.querySelector('#news .thinking .player').textContent = opponent.pseudo
+        document.querySelector('#news .thinking').style.display = 'block'
+    }
+    document.querySelector('#main-container').style.display = 'flex'
 })
 
 // Partie pleine, retrait de la partie dans la liste des parties disponibles
 socket.on('game-full', (game) => {
     console.log('game-full: ' + game.number)
-    document.querySelector('button.join[data-gameId="' + game.id + '"]').remove()
+    document.querySelectorAll('button.join').forEach((button) => {
+        if (button.getAttribute('data-game-id') === game.id) {
+            button.remove()
+        }
+    })
 })
 
 // Un utilisateur rejoint ma partie : la partie peut commencer
-socket.on('other-player-joined', (game) => {
-    console.log('other-player-joined: ' + game.number)
+socket.on('other-player-joined', (opponent, firstPlayer) => {
+    console.log(firstPlayer)
+    console.log('other-player-joined: ' + opponent.pseudo)
+    document.querySelector('#news .waiting-user').style.display = 'none'
+    document.querySelector('#news .user-arrived .player').textContent = opponent.pseudo
+    document.querySelector('#news .user-arrived').style.display = 'block'
+    document.querySelector('#news ' + (firstPlayer ? '.i-start' : '.other-start')).style.display = 'block'
+    if (!firstPlayer) {
+        document.querySelector('#news .thinking .player').textContent = opponent.pseudo
+        document.querySelector('#news .thinking').style.display = 'block'
+    }
+})
+
+// L'autre utilisateur quitte la partie
+socket.on('other-player-left', (user) => {
+    console.log('other-player-left: ' + user.pseudo)
+    document.querySelector('#news .user-left .player').textContent = user.pseudo
+    document.querySelector('#news .user-left').style.display = 'block'
 })
 
 

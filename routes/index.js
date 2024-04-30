@@ -8,7 +8,7 @@ router.get('/', function(req, res) {
     title: 'Yokai no mori',
     xNbTile: 3,
     yNbTile: 4,
-    tileSize: 100,
+    tileSize: 120,
     boardGame: boardGame
   });
 });
