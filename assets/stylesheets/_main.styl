@@ -59,29 +59,29 @@
     .frame
       stroke-width 0.5
       fill transparent
-    &.kodama
-      &.selected .outline
+    &[data-type="kodama"]
+      &[data-selected="1"] .outline
         fill kodama_color + 90%
       .outline, .frame
         stroke kodama_color
       .move, .promotion-sign
         fill kodama_color
-    &.koropokkuru
-      &.selected .outline
+    &[data-type="koropokkuru"]
+      &[data-selected="1"] .outline
         fill koropokkuru_color + 90%
       .outline, .frame
         stroke koropokkuru_color
       .move, .promotion-sign
         fill koropokkuru_color
-    &.tanuki
-      &.selected .outline
+    &[data-type="tanuki"]
+      &[data-selected="1"] .outline
         fill tanuki_color + 90%
       .outline, .frame
         stroke tanuki_color
       .move, .promotion-sign
         fill tanuki_color
-    &.kitsune
-      &.selected .outline
+    &[data-type="kitsune"]
+      &[data-selected="1"] .outline
         fill kitsune_color + 90%
       .outline, .frame
         stroke kitsune_color
@@ -92,20 +92,20 @@
   .piece
     display block
     margin auto
-    &.opponent
+    &[data-side="opponent"]
       transform-origin 50% 50%
       transform scale(1,-1)
     & .promotion-sign
       display none
-    &.promoted .promotion-sign
+    &[data-is-promoted="1"] .promotion-sign
       display block
-    .move.enabled
+    .move[data-basic-enabled="1"]
       display block
-    .move.disabled
+    .move[data-basic-enabled="0"]
       display none
-    &.promoted .move.enabledIfPromoted
+    &[data-is-promoted="1"] .move[data-promoted-enabled="1"]
       display block
-    &.promoted .move.disabledIfPromoted
+    &[data-is-promoted="1"] .move[data-promoted-enabled="0"]
       display none
 
 

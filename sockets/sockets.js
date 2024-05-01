@@ -37,7 +37,7 @@ exports.start = (io) => {
         if (availableGameList.length > 0) {
             socket.emit('games-available', availableGameList)
         } else {
-            let game = createNewGame()
+            const game = createNewGame()
             game.join(currentUser)
             socket.join(game.id)
             socket.emit('new-game-joined', game)
@@ -45,7 +45,7 @@ exports.start = (io) => {
         }
 
         socket.on('new-game-requested', function() {
-            let game = createNewGame()
+            const game = createNewGame()
             game.join(currentUser)
             socket.join(game.id)
             socket.emit('new-game-joined', game)
@@ -53,7 +53,7 @@ exports.start = (io) => {
         })
 
         socket.on('join-game-requested', function(gameId) {
-            let game = data.gameList.find((game) => game.id === gameId)
+            const game = data.gameList.find((game) => game.id === gameId)
             game.join(currentUser)
             console.log('join-game ' + game.number);
             socket.join(game.id)
@@ -67,19 +67,19 @@ exports.start = (io) => {
             console.log('disconnecting user ' + currentUser.pseudo)
 
             // suppression de l'utilisateur
-            let userIndex = data.userList.findIndex((user) => user.id === currentUser.id)
+            const userIndex = data.userList.findIndex((user) => user.id === currentUser.id)
             data.userList.splice(userIndex, 1)
 
             // recherche de ses parties en cours
             let rooms = socket.rooms
             rooms.forEach(function (room) {
-                let game = data.gameList.find((game) => game.id === room)
+                const game = data.gameList.find((game) => game.id === room)
                 if (!game) { return } // il s'agit de la room par défaut de l'utilisateur
                 game.quit(currentUser)
                 console.log('user disconnected from game : ' + room)
 
                 // suppression de la partie
-                let gameIndex = data.gameList.findIndex((game) => game.id === room)
+                const gameIndex = data.gameList.findIndex((game) => game.id === room)
                 data.gameList.splice(gameIndex, 1)
 
                 // on prévient le potentiel joueur restant que son adversaire est parti
@@ -91,5 +91,12 @@ exports.start = (io) => {
                 socket.broadcast.emit('game-deleted', game)
             })
         })
+        //
+        // socket.on('piece-selection', function (gameId, pieceId) {
+        //     console.log('piece selected : ' + pieceId)
+        //     const game = data.gameList.find((game) => game.id === gameId)
+        //     const piece = game.boardGame.pieces.find((piece) => piece.id === pieceId)
+        //     socket.emit()
+        // })
     })
 }

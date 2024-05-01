@@ -5,6 +5,7 @@ function displayBoard(game) {
     document.querySelector('#game-number .number').textContent = game.number
     document.querySelector('#game-number').style.display = 'block'
     document.querySelector('#leave-game').style.display = 'block'
+    document.querySelector('#main-container').setAttribute('data-game-id', game.id)
     document.querySelector('#main-container').style.display = 'flex'
 }
 
@@ -39,7 +40,7 @@ document.querySelector('#new-game').addEventListener('click', (e) => {
 
 // Un utilisateur rejoint une nouvelle partie : affichage du plateau
 socket.on('new-game-joined', (game) => {
-    document.querySelectorAll('.piece.p2').forEach((piece) => {
+    document.querySelectorAll('.piece[data-player="p2"]').forEach((piece) => {
         piece.remove()
     })
     document.querySelector('#news .waiting-user').style.display = 'block'
@@ -68,7 +69,7 @@ document.querySelector('#choose-game').addEventListener('click', (e) => {
 
 // Un utilisateur rejoint une partie existante : affichage du plateau
 socket.on('game-joined', (game, opponent, amIFirstPlayer) => {
-    document.querySelectorAll('.piece.p1').forEach((piece) => {
+    document.querySelectorAll('.piece[data-player="p1"]').forEach((piece) => {
         piece.remove()
     })
     document.querySelector('#news .opponent .player').textContent = opponent.pseudo
@@ -105,13 +106,11 @@ socket.on('other-player-joined', (opponent, firstPlayer) => {
 })
 
 // Fin de partie (gagné, perdu ou l'autre joueur s'est déconnecté) : on affiche une modal
-socket.on('game-over', (why, user) => {
+socket.on('game-over', (why, opponent) => {
     const gameOverModal = new bootstrap.Modal('#game-over-modal')
-    if (why === 'other-player-left') {
-        console.log('other-player-left : ' + user.pseudo)
-        document.querySelector('#news .other-player-left').style.display = 'block'
-        document.querySelector('#game-over-modal .other-player-left').style.display = 'block'
-    }
+    document.querySelector('#news .thinking').style.display = 'none'
+    document.querySelector('#news .' + why).style.display = 'block'
+    document.querySelector('#game-over-modal .' + why).style.display = 'block'
     gameOverModal.show()
 })
 
@@ -125,10 +124,26 @@ socket.on('game-deleted', (game) => {
     })
 })
 
-// Sélection d'une pièce sur le plateau de jeu
+// Sélection d'une pièce
 document.querySelectorAll('.piece').forEach((piece) => {
     piece.addEventListener('click', (e) => {
-        document.querySelectorAll('.piece').forEach((other) => other.classList.remove('selected'))
-        e.target.classList.add('selected')
+        // let currentGame = document.querySelector('#main-container')
+        const currentPiece = e.currentTarget
+        const isPromoted = (currentPiece.getAttribute('data-is-promoted') === '1')
+        const selectedPiece = document.querySelector('.piece[data-selected="1"]')
+        if (currentPiece.getAttribute("data-side") === 'player') {
+            if (selectedPiece) {
+                selectedPiece.setAttribute("data-selected", "0")
+            }
+            if (selectedPiece !== currentPiece) {
+                currentPiece.setAttribute('data-selected', '1')
+                // socket.emit('piece-selection', currentGame.getAttribute('data-game-id'), currentPiece.id)
+                let allowedMoves = []
+                currentPiece.querySelectorAll('.move[data-' + (isPromoted ? 'promoted' : 'basic') + '-enabled="1"]').forEach((move) => {
+                    allowedMoves.push(move.getAttribute('data-position'))
+                })
+                console.log(allowedMoves)
+            }
+        }
     })
 })

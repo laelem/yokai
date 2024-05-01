@@ -4,7 +4,11 @@ svg(
   height=tileSize
   viewbox='0 0 100 100'
   id=piece.id
-  class=player + ' ' + (piece.promoted ? 'promoted' : '') + ' ' + piece.type + ' piece '+ (piece.player !== player ? 'opponent' : 'player')
+  data-type=piece.type
+  data-player=player
+  data-side=(piece.player !== player ? 'opponent' : 'player')
+  data-is-promoted=(piece.promoted ? '1' : '0')
+  class="piece"
 )
   path.outline(d='M 50 15, 75 23, 85 85, 15 85, 25 23, Z')
   rect.frame(
@@ -34,10 +38,11 @@ svg(
       ['top-left', '32.5', '35'],
     ]
   each move in moves
-    - let classList = 'move ' + move[0] + (piece.moves.includes(move[0]) ? ' enabled' : ' disabled')
-    - classList += piece.promotedMoves.includes(move[0]) ? ' enabledIfPromoted' : ' disabledIfPromoted'
     circle(
-      class=classList
+      class='move'
+      data-position=move[0]
+      data-basic-enabled=(piece.basicMoves.includes(move[0]) ? '1' : '0')
+      data-promoted-enabled=(piece.promotedMoves.includes(move[0]) ? '1' : '0')
       cx=move[1]
       cy=move[2]
       r='3'

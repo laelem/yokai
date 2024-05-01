@@ -9,22 +9,29 @@ class Piece {
 
         switch (this.type) {
             case 'koropokkuru':
-                this.moves = ['top', 'bottom', 'left', 'right', 'top-right', 'top-left', 'bottom-right', 'bottom-left']
+                this.basicMoves = ['top', 'bottom', 'left', 'right', 'top-right', 'top-left', 'bottom-right', 'bottom-left']
                 this.promotedMoves = []
                 break
             case 'kitsune':
-                this.moves = ['top-right', 'top-left', 'bottom-right', 'bottom-left']
+                this.basicMoves = ['top-right', 'top-left', 'bottom-right', 'bottom-left']
                 this.promotedMoves = []
                 break
             case 'tanuki':
-                this.moves = ['top', 'bottom', 'left', 'right']
+                this.basicMoves = ['top', 'bottom', 'left', 'right']
                 this.promotedMoves = []
                 break
             case 'kodama':
-                this.moves = ['top']
+                this.basicMoves = ['top']
                 this.promotedMoves = ['top', 'bottom', 'left', 'right', 'top-right', 'top-left']
                 break
         }
+
+        this.moves = this.promoted ? this.basicMoves : this.promotedMoves
+    }
+
+    promote() {
+        this.promoted = true
+        this.moves = this.promotedMoves
     }
 }
 

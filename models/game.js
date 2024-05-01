@@ -1,4 +1,5 @@
-const uniqid = require("uniqid");
+const uniqid = require("uniqid")
+const BoardGame = require("./boardGame")
 
 class Game {
     constructor(number = 1) {
@@ -7,6 +8,7 @@ class Game {
         this.playerList = []
         this.activePlayerList = []
         this.firstPlayerIndex = Math.floor(Math.random() * 2)
+        this.boardGame = new BoardGame()
     }
 
     join(user) {
