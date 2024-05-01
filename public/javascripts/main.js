@@ -1,5 +1,13 @@
 const socket = io()
 
+function displayBoard(game) {
+    document.querySelector('#choose-game').style.display = 'none'
+    document.querySelector('#game-number .number').textContent = game.number
+    document.querySelector('#game-number').style.display = 'block'
+    document.querySelector('#leave-game').style.display = 'block'
+    document.querySelector('#main-container').style.display = 'flex'
+}
+
 // Connexion d'un nouvel utilisateur
 socket.on('user-connected', (user) => {
     console.log('user connected : ' + user.pseudo)
@@ -31,13 +39,11 @@ document.querySelector('#new-game').addEventListener('click', (e) => {
 
 // Un utilisateur rejoint une nouvelle partie : affichage du plateau
 socket.on('new-game-joined', (game) => {
-    console.log('new-game-joined: ' + game.number)
     document.querySelectorAll('.piece.p2').forEach((piece) => {
         piece.remove()
     })
-    document.querySelector('#choose-game').style.display = 'none'
-    document.querySelector('#main-container').style.display = 'flex'
     document.querySelector('#news .waiting-user').style.display = 'block'
+    displayBoard(game)
 })
 
 // Nouvelle partie créée, affichage de la partie dans la liste des parties disponibles
@@ -61,19 +67,18 @@ document.querySelector('#choose-game').addEventListener('click', (e) => {
 })
 
 // Un utilisateur rejoint une partie existante : affichage du plateau
-socket.on('game-joined', (opponent, firstPlayer) => {
+socket.on('game-joined', (game, opponent, amIFirstPlayer) => {
     document.querySelectorAll('.piece.p1').forEach((piece) => {
         piece.remove()
     })
-    document.querySelector('#choose-game').style.display = 'none'
     document.querySelector('#news .opponent .player').textContent = opponent.pseudo
     document.querySelector('#news .opponent').style.display = 'block'
-    document.querySelector('#news ' + (firstPlayer ? '.i-start' : '.other-start')).style.display = 'block'
-    if (!firstPlayer) {
+    document.querySelector('#news ' + (amIFirstPlayer ? '.i-start' : '.other-start')).style.display = 'block'
+    if (!amIFirstPlayer) {
         document.querySelector('#news .thinking .player').textContent = opponent.pseudo
         document.querySelector('#news .thinking').style.display = 'block'
     }
-    document.querySelector('#main-container').style.display = 'flex'
+    displayBoard(game)
 })
 
 // Partie pleine, retrait de la partie dans la liste des parties disponibles
@@ -99,20 +104,26 @@ socket.on('other-player-joined', (opponent, firstPlayer) => {
     }
 })
 
-// Fin de partie (gagné, perdu ou l'autre joueur s'est déconnecté)
+// Fin de partie (gagné, perdu ou l'autre joueur s'est déconnecté) : on affiche une modal
 socket.on('game-over', (why, user) => {
-    const myModal = new bootstrap.Modal('#myModal', {
-        keyboard: false
-    })
+    const gameOverModal = new bootstrap.Modal('#game-over-modal')
     if (why === 'other-player-left') {
         console.log('other-player-left : ' + user.pseudo)
+        document.querySelector('#news .other-player-left').style.display = 'block'
+        document.querySelector('#game-over-modal .other-player-left').style.display = 'block'
     }
-    document.querySelector('#news .user-left .player').textContent = user.pseudo
-    document.querySelector('#news .user-left').style.display = 'block'
+    gameOverModal.show()
 })
 
-
-
+// Partie supprimée : retrait de la liste des parties disponibles
+socket.on('game-deleted', (game) => {
+    console.log('game-deleted: ' + game.number)
+    document.querySelectorAll('button.join').forEach((button) => {
+        if (button.getAttribute('data-game-id') === game.id) {
+            button.remove()
+        }
+    })
+})
 
 // Sélection d'une pièce sur le plateau de jeu
 document.querySelectorAll('.piece').forEach((piece) => {

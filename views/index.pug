@@ -3,9 +3,11 @@ extends layout
 block content
   #main.container
     header#header.row.g-0.py-3.border-bottom
-      .col
+      .col.py-3
+        button#leave-game.btn.btn-sm.btn-outline-danger(type="button" onclick="window.location.reload()") Quitter
       .col
         h1.text-center.display-3= __('app.name')
+        h2#game-number.display-6.text-center Partie #<span class="number"></span>
       #user-panel.col.py-3.text-end
         p.welcome Bonjour <span class="pseudo"></span>
     #choose-game.row.mt-4.pt-4
@@ -26,6 +28,9 @@ block content
           span.spinner-grow.spinner-grow-sm(aria-hidden="true")
           span.text(role="status") <span class="player"></span> réfléchit...
         p.message.shot <span class="player"></span> joue <span class="shot"></span>.
+        p.message.other-player-left Votre adversaire a quitté la partie.
+        p.message.win Vous avez gagné la partie !
+        p.message.loose Votre adversaire a gagné la partie.
       #board-game-container.col.col-md-auto(style={
         width: (xNbTile * tileSize) + 'px'
       })
@@ -69,7 +74,7 @@ block content
         .modal-body
           p.message.other-player-left Votre adversaire a quitté la partie.
           p.message.win Vous avez gagné la partie !
-          p.message.loose Vous avez perdu...
+          p.message.loose Votre adversaire a gagné la partie.
         .modal-footer
           button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Voir le plateau
-          button.btn.btn-primary(type='button') Rejouer
+          button.btn.btn-primary(type='button' onclick="window.location.reload()") Rejouer

@@ -57,9 +57,10 @@ exports.start = (io) => {
             game.join(currentUser)
             console.log('join-game ' + game.number);
             socket.join(game.id)
-            socket.emit('game-joined', game.playerList[0], currentUser === game.playerList[game.firstPlayerIndex])
+            const amIFirstPlayer = currentUser === game.playerList[game.firstPlayerIndex]
+            socket.emit('game-joined', game, game.playerList[0], amIFirstPlayer)
             socket.broadcast.emit('game-full', game)
-            socket.to(game.id).emit('other-player-joined', currentUser, currentUser !== game.playerList[game.firstPlayerIndex])
+            socket.to(game.id).emit('other-player-joined', currentUser, !amIFirstPlayer)
         })
 
         socket.on('disconnecting', function () {
@@ -85,6 +86,9 @@ exports.start = (io) => {
                 if (game.activePlayerList.length === 1) {
                     socket.to(game.id).emit('game-over', 'other-player-left', currentUser)
                 }
+
+                // on supprime la partie des parties disponibles
+                socket.broadcast.emit('game-deleted', game)
             })
         })
     })
