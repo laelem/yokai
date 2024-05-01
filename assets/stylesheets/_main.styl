@@ -41,10 +41,15 @@
 #board-game
   margin 10px auto
   .cell
-    background-color #b5cd83
     margin 1px
+    background-color #b5cd83
+    &.move-allowed
+      background-color lighten(#b5cd83, 10)
+      cursor pointer
     &.river
       background-color #99c9e9
+      &.move-allowed
+        background-color lighten(#99c9e9, 10)
 
   // design général d'une pièce
   .piece
@@ -61,28 +66,28 @@
       fill transparent
     &[data-type="kodama"]
       &[data-selected="1"] .outline
-        fill kodama_color + 90%
+        fill kodama_color + 95%
       .outline, .frame
         stroke kodama_color
       .move, .promotion-sign
         fill kodama_color
     &[data-type="koropokkuru"]
       &[data-selected="1"] .outline
-        fill koropokkuru_color + 90%
+        fill koropokkuru_color + 95%
       .outline, .frame
         stroke koropokkuru_color
       .move, .promotion-sign
         fill koropokkuru_color
     &[data-type="tanuki"]
       &[data-selected="1"] .outline
-        fill tanuki_color + 90%
+        fill tanuki_color + 95%
       .outline, .frame
         stroke tanuki_color
       .move, .promotion-sign
         fill tanuki_color
     &[data-type="kitsune"]
       &[data-selected="1"] .outline
-        fill kitsune_color + 90%
+        fill kitsune_color + 95%
       .outline, .frame
         stroke kitsune_color
       .move, .promotion-sign
@@ -92,6 +97,8 @@
   .piece
     display block
     margin auto
+    &[data-side="player"] > *
+      cursor pointer
     &[data-side="opponent"]
       transform-origin 50% 50%
       transform scale(1,-1)

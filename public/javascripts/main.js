@@ -129,21 +129,52 @@ document.querySelectorAll('.piece').forEach((piece) => {
     piece.addEventListener('click', (e) => {
         // let currentGame = document.querySelector('#main-container')
         const currentPiece = e.currentTarget
+        const currentCell = currentPiece.closest('.cell')
+        const x = parseInt(currentCell.getAttribute('data-x'))
+        const y = parseInt(currentCell.getAttribute('data-y'))
         const isPromoted = (currentPiece.getAttribute('data-is-promoted') === '1')
         const selectedPiece = document.querySelector('.piece[data-selected="1"]')
+
         if (currentPiece.getAttribute("data-side") === 'player') {
             if (selectedPiece) {
                 selectedPiece.setAttribute("data-selected", "0")
-            }
-            if (selectedPiece !== currentPiece) {
-                currentPiece.setAttribute('data-selected', '1')
-                // socket.emit('piece-selection', currentGame.getAttribute('data-game-id'), currentPiece.id)
-                let allowedMoves = []
-                currentPiece.querySelectorAll('.move[data-' + (isPromoted ? 'promoted' : 'basic') + '-enabled="1"]').forEach((move) => {
-                    allowedMoves.push(move.getAttribute('data-position'))
+                document.querySelectorAll('.cell').forEach((cell) => {
+                    cell.classList.remove('move-allowed')
                 })
-                console.log(allowedMoves)
             }
+            if (selectedPiece === currentPiece) {
+                return
+            }
+
+            currentPiece.setAttribute('data-selected', '1')
+            // socket.emit('piece-selection', currentGame.getAttribute('data-game-id'), currentPiece.id)
+            let allowedMoves = []
+            currentPiece.querySelectorAll('.move[data-' + (isPromoted ? 'promoted' : 'basic') + '-enabled="1"]').forEach((move) => {
+                allowedMoves.push(move.getAttribute('data-position'))
+            })
+
+            let xMove
+            let yMove
+            allowedMoves.forEach((move) => {
+                switch (move) {
+                    case 'top': xMove = x; yMove = y-1; break
+                    case 'bottom': xMove = x; yMove = y+1; break
+                    case 'right': xMove = x+1; yMove = y; break
+                    case 'left': xMove = x-1; yMove = y; break
+                    case 'top-right': xMove = x+1; yMove = y-1; break
+                    case 'bottom-right': xMove = x+1; yMove = y+1; break
+                    case 'top-left': xMove = x-1; yMove = y-1; break
+                    case 'bottom-left': xMove = x-1; yMove = y+1; break
+                }
+                const cell = document.querySelector('.cell[data-x="' + xMove + '"][data-y="' + yMove + '"]')
+                if (cell) {
+                    const piece = cell.querySelector('.piece')
+                    console.log(piece)
+                    if (!piece || piece.getAttribute('data-side') !== 'player') {
+                        cell.classList.add('move-allowed')
+                    }
+                }
+            })
         }
     })
 })

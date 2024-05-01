@@ -47,7 +47,9 @@ block content
                   height: tileSize + 'px'
                 })
                   div(
-                    class='cell ' + (y > 0 && y < 3 ? 'river' : '') + ' cell-' + x + '-' + y,
+                    class='cell' + (y > 0 && y < 3 ? ' river' : '')
+                    data-x=x
+                    data-y=y
                     style={
                       width: (tileSize - 2) + 'px',
                       height: (tileSize - 2) + 'px'
