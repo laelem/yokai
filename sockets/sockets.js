@@ -64,18 +64,26 @@ exports.start = (io) => {
 
         socket.on('disconnecting', function () {
             console.log('disconnecting user ' + currentUser.pseudo)
+
+            // suppression de l'utilisateur
             let userIndex = data.userList.findIndex((user) => user.id === currentUser.id)
             data.userList.splice(userIndex, 1)
 
+            // recherche de ses parties en cours
             let rooms = socket.rooms
             rooms.forEach(function (room) {
-                console.log('user disconnected from game : ' + room)
                 let game = data.gameList.find((game) => game.id === room)
-                if (game.playerList.length === 1) {
-                    socket.to(game.id).emit('other-player-left', currentUser)
-                } else {
-                    let gameIndex = data.gameList.findIndex((game) => game.id === room)
-                    data.gameList.splice(gameIndex, 1)
+                if (!game) { return } // il s'agit de la room par défaut de l'utilisateur
+                game.quit(currentUser)
+                console.log('user disconnected from game : ' + room)
+
+                // suppression de la partie
+                let gameIndex = data.gameList.findIndex((game) => game.id === room)
+                data.gameList.splice(gameIndex, 1)
+
+                // on prévient le potentiel joueur restant que son adversaire est parti
+                if (game.activePlayerList.length === 1) {
+                    socket.to(game.id).emit('game-over', 'other-player-left', currentUser)
                 }
             })
         })

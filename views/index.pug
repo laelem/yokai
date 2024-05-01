@@ -58,3 +58,18 @@ block content
                       include piece.pug
         section.stock.player(style={height: tileSize * 0.75 + 'px'})
       #tchat.col
+
+  // Modal affichée lorsque la partie est terminée
+  #game-over-modal.modal.fade(tabindex='-1')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h1.modal-title.fs-5 Partie terminée
+          button.btn-close(type='button' data-bs-dismiss='modal')
+        .modal-body
+          p.message.other-player-left Votre adversaire a quitté la partie.
+          p.message.win Vous avez gagné la partie !
+          p.message.loose Vous avez perdu...
+        .modal-footer
+          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Voir le plateau
+          button.btn.btn-primary(type='button') Rejouer

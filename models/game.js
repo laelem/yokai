@@ -5,11 +5,18 @@ class Game {
         this.id = uniqid()
         this.number = number
         this.playerList = []
+        this.activePlayerList = []
         this.firstPlayerIndex = Math.floor(Math.random() * 2)
     }
 
     join(user) {
         this.playerList.push(user)
+        this.activePlayerList.push(user)
+    }
+
+    quit(user) {
+        let userIndex = this.activePlayerList.findIndex((player) => player.id === user.id)
+        this.activePlayerList.splice(userIndex, 1)
     }
 }
 

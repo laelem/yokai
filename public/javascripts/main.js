@@ -62,7 +62,6 @@ document.querySelector('#choose-game').addEventListener('click', (e) => {
 
 // Un utilisateur rejoint une partie existante : affichage du plateau
 socket.on('game-joined', (opponent, firstPlayer) => {
-    console.log(firstPlayer)
     document.querySelectorAll('.piece.p1').forEach((piece) => {
         piece.remove()
     })
@@ -89,7 +88,6 @@ socket.on('game-full', (game) => {
 
 // Un utilisateur rejoint ma partie : la partie peut commencer
 socket.on('other-player-joined', (opponent, firstPlayer) => {
-    console.log(firstPlayer)
     console.log('other-player-joined: ' + opponent.pseudo)
     document.querySelector('#news .waiting-user').style.display = 'none'
     document.querySelector('#news .user-arrived .player').textContent = opponent.pseudo
@@ -101,9 +99,14 @@ socket.on('other-player-joined', (opponent, firstPlayer) => {
     }
 })
 
-// L'autre utilisateur quitte la partie
-socket.on('other-player-left', (user) => {
-    console.log('other-player-left: ' + user.pseudo)
+// Fin de partie (gagné, perdu ou l'autre joueur s'est déconnecté)
+socket.on('game-over', (why, user) => {
+    const myModal = new bootstrap.Modal('#myModal', {
+        keyboard: false
+    })
+    if (why === 'other-player-left') {
+        console.log('other-player-left : ' + user.pseudo)
+    }
     document.querySelector('#news .user-left .player').textContent = user.pseudo
     document.querySelector('#news .user-left').style.display = 'block'
 })

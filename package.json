@@ -5,6 +5,9 @@
   "main": "app.js",
   "author": "Laëtitia Le Men",
   "license": "ISC",
+  "scripts": {
+    "start": "stylus assets/stylesheets/style.styl --out public/stylesheets --use ./node_modules/nib/lib/nib --include-css --compress && node app.js"
+  },
   "dependencies": {
     "express": "^4.18.3",
     "http-errors": "^2.0.0",
