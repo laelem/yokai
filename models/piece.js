@@ -1,11 +1,9 @@
 class Piece {
-    constructor(id, type, player, promoted, x, y) {
+    constructor(id, type, player, promoted) {
         this.id = id
         this.type = type
         this.player = player
         this.promoted = promoted
-        this.x = x
-        this.y = y
 
         switch (this.type) {
             case 'koropokkuru':
@@ -26,7 +24,7 @@ class Piece {
                 break
         }
 
-        this.moves = this.promoted ? this.basicMoves : this.promotedMoves
+        this.moves = this.promoted ? this.promotedMoves : this.basicMoves
     }
 
     promote() {

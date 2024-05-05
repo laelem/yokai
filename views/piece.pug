@@ -5,8 +5,8 @@ svg(
   viewbox='0 0 100 100'
   id=piece.id
   data-type=piece.type
-  data-player=player
-  data-side=(piece.player !== player ? 'opponent' : 'player')
+  data-player=piece.player
+  data-side='player'
   data-is-promoted=(piece.promoted ? '1' : '0')
   class="piece"
 )
@@ -26,24 +26,15 @@ svg(
     y=45
   )
     path(d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708")
-  -
-    let moves = [
-      ['top', '50', '35'],
-      ['top-right', '67.7', '35'],
-      ['right', '67.5', '52.5'],
-      ['bottom-right', '67.5', '70'],
-      ['bottom', '50', '70'],
-      ['bottom-left', '32.5', '70'],
-      ['left', '32.5', '52.5'],
-      ['top-left', '32.5', '35'],
-    ]
   each move in moves
     circle(
       class='move'
-      data-position=move[0]
-      data-basic-enabled=(piece.basicMoves.includes(move[0]) ? '1' : '0')
-      data-promoted-enabled=(piece.promotedMoves.includes(move[0]) ? '1' : '0')
-      cx=move[1]
-      cy=move[2]
+      data-position=move.id
+      data-x=move.x
+      data-y=move.y
+      data-basic-enabled=(piece.basicMoves.includes(move.id) ? '1' : '0')
+      data-promoted-enabled=(piece.promotedMoves.includes(move.id) ? '1' : '0')
+      cx=move.xSvg
+      cy=move.ySvg
       r='3'
     )

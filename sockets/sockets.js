@@ -57,7 +57,8 @@ exports.start = (io) => {
             game.join(currentUser)
             console.log('join-game ' + game.number);
             socket.join(game.id)
-            const amIFirstPlayer = currentUser === game.playerList[game.firstPlayerIndex]
+            game.start()
+            const amIFirstPlayer = currentUser === game.firstPlayer
             socket.emit('game-joined', game, game.playerList[0], amIFirstPlayer)
             socket.broadcast.emit('game-full', game)
             socket.to(game.id).emit('other-player-joined', currentUser, !amIFirstPlayer)
@@ -91,12 +92,24 @@ exports.start = (io) => {
                 socket.broadcast.emit('game-deleted', game)
             })
         })
-        //
-        // socket.on('piece-selection', function (gameId, pieceId) {
-        //     console.log('piece selected : ' + pieceId)
-        //     const game = data.gameList.find((game) => game.id === gameId)
-        //     const piece = game.boardGame.pieces.find((piece) => piece.id === pieceId)
-        //     socket.emit()
-        // })
+
+        socket.on('move-requested', function (gameId, pieceId, x, y) {
+            console.log('piece selected : ' + pieceId)
+
+            const game = data.gameList.find((game) => game.id === gameId)
+
+            if (currentUser !== game.turnPlayer) {
+                return
+            }
+
+            // Mise à jour du plateau de jeu si le coup est permis
+            if (!game.boardGame.move(pieceId, x, y)) {
+                return
+            }
+
+            game.endTurn()
+            socket.emit('move-played', gameId, pieceId, x, y)
+            socket.to(game.id).emit('opponent-move-played', gameId, pieceId, x, y)
+        })
     })
 }

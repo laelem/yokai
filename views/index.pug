@@ -19,50 +19,99 @@ block content
         p.message.waiting-user
           span.spinner-grow.spinner-grow-sm(aria-hidden="true")
           span.text(role="status") En attente d'un autre joueur...
-        p.message.user-arrived <span class="player"></span> vous a rejoint !
-        p.message.user-left <span class="player"></span> a quitté la partie.
-        p.message.opponent Votre adversaire est <span class="player"></span> !
+        p.message.user-arrived <em class="opponent"></em> vous a rejoint !
+        p.message.user-left <em class="opponent"></em> a quitté la partie.
+        p.message.opponent-identity Votre adversaire est <em class="opponent"></em> !
         p.message.i-start C'est à vous de commencer.
         p.message.other-start C'est à lui de commencer.
         p.message.thinking
           span.spinner-grow.spinner-grow-sm(aria-hidden="true")
-          span.text(role="status") <span class="player"></span> réfléchit...
-        p.message.shot <span class="player"></span> joue <span class="shot"></span>.
+          span.text(role="status") <em class="opponent"></em> réfléchit...
+        p.message.shot-template Vous jouez un <em class="piece-type"></em> en <em class="coords"></em>.
+        p.message.opponent-shot-template <em class="opponent"></em> joue un <em class="piece-type"></em> en <em class="coords"></em>.
+        p.message.your-turn C'est à votre tour.
         p.message.other-player-left Votre adversaire a quitté la partie.
         p.message.win Vous avez gagné la partie !
         p.message.loose Votre adversaire a gagné la partie.
       #board-game-container.col.col-md-auto(style={
-        width: (xNbTile * tileSize) + 'px'
+        width: (boardGame.xNbCell * tileSize) + 'px'
       })
         section.stock.opponent(style={height: tileSize * 0.75 + 'px'})
-        section#board-game.d-table(style={
-          width: (xNbTile * tileSize) + 'px',
-          height: (yNbTile * tileSize) + 'px'
+
+        -
+          let moves = [
+            {'id': 'top',           'x': 0,   'y': -1,  'xSvg': '50',   'ySvg': '35'},
+            {'id': 'top-right',     'x': 1,   'y': -1,  'xSvg': '67.7', 'ySvg': '35'},
+            {'id': 'right',         'x': 1,   'y': 0,   'xSvg': '67.5', 'ySvg': '52.5'},
+            {'id': 'bottom-right',  'x': 1,   'y': 1,   'xSvg': '67.5', 'ySvg': '70'},
+            {'id': 'bottom',        'x': 0,   'y': 1,   'xSvg': '50',   'ySvg': '70'},
+            {'id': 'bottom-left',   'x': -1,  'y': 1,   'xSvg': '32.5', 'ySvg': '70'},
+            {'id': 'left',          'x': -1,  'y': 0,   'xSvg': '32.5', 'ySvg': '52.5'},
+            {'id': 'top-left',      'x': -1,  'y': -1,  'xSvg': '32.5', 'ySvg': '35'},
+          ]
+
+        section.board-game.d-table(data-player="p1" style={
+          width: (boardGame.xNbCell * tileSize) + 'px',
+          height: (boardGame.yNbCell * tileSize) + 'px'
         })
-          - for (var y = 0, y2 = yNbTile-1; y < yNbTile; ++y, --y2)
+          each row, y in boardGame.cells
             .d-table-row
-              - for (var x = 0, x2 = xNbTile-1; x < xNbTile; ++x, --x2)
-                .tile.d-table-cell(style={
-                  width: tileSize + 'px',
-                  height: tileSize + 'px'
-                })
-                  div(
-                    class='cell' + (y > 0 && y < 3 ? ' river' : '')
-                    data-x=x
-                    data-y=y
-                    style={
-                      width: (tileSize - 2) + 'px',
-                      height: (tileSize - 2) + 'px'
-                    }
-                  )
-                    - let piece = boardGame.state['pos' + x + '_' + y]
-                    - if (piece)
-                      - let player = 'p1'
-                      include piece.pug
-                    - piece = boardGame.state['pos' + x2 + '_' + y2]
-                    - if (piece)
-                      - let player = 'p2'
-                      include piece.pug
+            each piece, x in row
+              .tile.d-table-cell(style={
+                width: tileSize + 'px',
+                height: tileSize + 'px'
+              })
+                div(
+                  class='cell' + (y > 0 && y < 3 ? ' river' : '')
+                  data-x=x
+                  data-y=y
+                  style={
+                    width: (tileSize - 2) + 'px',
+                    height: (tileSize - 2) + 'px'
+                  }
+                )
+                  - if (piece)
+                    include piece.pug
+
+        -
+          moves = [
+            {'id': 'top',           'x': 0,   'y': 1,   'xSvg': '50',   'ySvg': '35'},
+            {'id': 'top-right',     'x': -1,  'y': 1,   'xSvg': '67.7', 'ySvg': '35'},
+            {'id': 'right',         'x': -1,  'y': 0,   'xSvg': '67.5', 'ySvg': '52.5'},
+            {'id': 'bottom-right',  'x': -1,  'y': -1,  'xSvg': '67.5', 'ySvg': '70'},
+            {'id': 'bottom',        'x': 0,   'y': -1,  'xSvg': '50',   'ySvg': '70'},
+            {'id': 'bottom-left',   'x': 1,   'y': -1,  'xSvg': '32.5', 'ySvg': '70'},
+            {'id': 'left',          'x': 1,   'y': 0,   'xSvg': '32.5', 'ySvg': '52.5'},
+            {'id': 'top-left',      'x': 1,   'y': 1,   'xSvg': '32.5', 'ySvg': '35'},
+          ]
+
+        section.board-game.d-table(data-player="p2" style={
+          width: (boardGame.xNbCell * tileSize) + 'px',
+          height: (boardGame.yNbCell * tileSize) + 'px'
+        })
+          - let reversedCells = boardGame.cells.reverse()
+          each row, y in reversedCells
+            .d-table-row
+            - let reversedRow = row.reverse()
+            - let mirrorY = boardGame.yNbCell - y - 1
+            each piece, x in reversedRow
+              - let mirrorX = boardGame.xNbCell - x - 1
+              .tile.d-table-cell(style={
+                width: tileSize + 'px',
+                height: tileSize + 'px'
+              })
+                div(
+                  class='cell' + (y > 0 && y < 3 ? ' river' : '')
+                  data-x=mirrorX
+                  data-y=mirrorY
+                  style={
+                    width: (tileSize - 2) + 'px',
+                    height: (tileSize - 2) + 'px'
+                  }
+                )
+                  - if (piece)
+                    include piece.pug
+
         section.stock.player(style={height: tileSize * 0.75 + 'px'})
       #tchat.col
 

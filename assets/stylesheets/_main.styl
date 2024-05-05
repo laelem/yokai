@@ -21,6 +21,9 @@
   .message
     display none
     margin-bottom 0.5rem
+    em
+      font-weight bold
+      font-style normal
   .waiting-user, .thinking
     .text
       padding-left 10px
@@ -38,7 +41,7 @@
   .stock
     background-color #eee
 
-#board-game
+.board-game
   margin 10px auto
   .cell
     margin 1px
@@ -114,6 +117,8 @@
       display block
     &[data-is-promoted="1"] .move[data-promoted-enabled="0"]
       display none
+    &.capture-allowed .outline
+      fill #ffb9b9
 
 
 

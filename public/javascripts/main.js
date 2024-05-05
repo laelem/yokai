@@ -40,10 +40,18 @@ document.querySelector('#new-game').addEventListener('click', (e) => {
 
 // Un utilisateur rejoint une nouvelle partie : affichage du plateau
 socket.on('new-game-joined', (game) => {
+    // suppression du plateau en miroir
+    document.querySelector('.board-game[data-player="p2"]').remove()
+
+    // identification des pièces adverses
     document.querySelectorAll('.piece[data-player="p2"]').forEach((piece) => {
-        piece.remove()
+        piece.setAttribute('data-side', 'opponent')
     })
+
+    // Affichage des messages de notification
     document.querySelector('#news .waiting-user').style.display = 'block'
+
+    // affichage du plateau de jeu
     displayBoard(game)
 })
 
@@ -69,16 +77,25 @@ document.querySelector('#choose-game').addEventListener('click', (e) => {
 
 // Un utilisateur rejoint une partie existante : affichage du plateau
 socket.on('game-joined', (game, opponent, amIFirstPlayer) => {
+    // suppression du plateau en miroir
+    document.querySelector('.board-game[data-player="p1"]').remove()
+
+    // identification des pièces adverses
     document.querySelectorAll('.piece[data-player="p1"]').forEach((piece) => {
-        piece.remove()
+        piece.setAttribute('data-side', 'opponent')
     })
-    document.querySelector('#news .opponent .player').textContent = opponent.pseudo
-    document.querySelector('#news .opponent').style.display = 'block'
+
+    // Affichage des messages de notification
+    document.querySelectorAll('#news .opponent').forEach((opponentPseudoNode) => {
+        opponentPseudoNode.textContent = opponent.pseudo
+    })
+    document.querySelector('#news .opponent-identity').style.display = 'block'
     document.querySelector('#news ' + (amIFirstPlayer ? '.i-start' : '.other-start')).style.display = 'block'
     if (!amIFirstPlayer) {
-        document.querySelector('#news .thinking .player').textContent = opponent.pseudo
         document.querySelector('#news .thinking').style.display = 'block'
     }
+
+    // affichage du plateau de jeu
     displayBoard(game)
 })
 
@@ -96,11 +113,12 @@ socket.on('game-full', (game) => {
 socket.on('other-player-joined', (opponent, firstPlayer) => {
     console.log('other-player-joined: ' + opponent.pseudo)
     document.querySelector('#news .waiting-user').style.display = 'none'
-    document.querySelector('#news .user-arrived .player').textContent = opponent.pseudo
+    document.querySelectorAll('#news .opponent').forEach((opponentPseudoNode) => {
+        opponentPseudoNode.textContent = opponent.pseudo
+    })
     document.querySelector('#news .user-arrived').style.display = 'block'
     document.querySelector('#news ' + (firstPlayer ? '.i-start' : '.other-start')).style.display = 'block'
     if (!firstPlayer) {
-        document.querySelector('#news .thinking .player').textContent = opponent.pseudo
         document.querySelector('#news .thinking').style.display = 'block'
     }
 })
@@ -127,7 +145,6 @@ socket.on('game-deleted', (game) => {
 // Sélection d'une pièce
 document.querySelectorAll('.piece').forEach((piece) => {
     piece.addEventListener('click', (e) => {
-        // let currentGame = document.querySelector('#main-container')
         const currentPiece = e.currentTarget
         const currentCell = currentPiece.closest('.cell')
         const x = parseInt(currentCell.getAttribute('data-x'))
@@ -135,46 +152,141 @@ document.querySelectorAll('.piece').forEach((piece) => {
         const isPromoted = (currentPiece.getAttribute('data-is-promoted') === '1')
         const selectedPiece = document.querySelector('.piece[data-selected="1"]')
 
+        // le joueur sélectionne une de ses pièces
         if (currentPiece.getAttribute("data-side") === 'player') {
+            // une pièce était déjà sélectionnée : on enlève sa surbrillance et la surbrillance des mouvements autorisés
             if (selectedPiece) {
                 selectedPiece.setAttribute("data-selected", "0")
                 document.querySelectorAll('.cell').forEach((cell) => {
                     cell.classList.remove('move-allowed')
                 })
+                document.querySelectorAll('.piece').forEach((piece) => {
+                    piece.classList.remove('capture-allowed')
+                })
             }
+
+            // si la pièce est la même, on ne fait rien
             if (selectedPiece === currentPiece) {
                 return
             }
 
+            // si elle est différente, on la met en surbrillance
             currentPiece.setAttribute('data-selected', '1')
-            // socket.emit('piece-selection', currentGame.getAttribute('data-game-id'), currentPiece.id)
-            let allowedMoves = []
-            currentPiece.querySelectorAll('.move[data-' + (isPromoted ? 'promoted' : 'basic') + '-enabled="1"]').forEach((move) => {
-                allowedMoves.push(move.getAttribute('data-position'))
-            })
 
-            let xMove
-            let yMove
-            allowedMoves.forEach((move) => {
-                switch (move) {
-                    case 'top': xMove = x; yMove = y-1; break
-                    case 'bottom': xMove = x; yMove = y+1; break
-                    case 'right': xMove = x+1; yMove = y; break
-                    case 'left': xMove = x-1; yMove = y; break
-                    case 'top-right': xMove = x+1; yMove = y-1; break
-                    case 'bottom-right': xMove = x+1; yMove = y+1; break
-                    case 'top-left': xMove = x-1; yMove = y-1; break
-                    case 'bottom-left': xMove = x-1; yMove = y+1; break
-                }
-                const cell = document.querySelector('.cell[data-x="' + xMove + '"][data-y="' + yMove + '"]')
+            // Mise en surbrillance des cases autorisées pour un mouvement
+            let xMove, yMove, cell, piece
+            currentPiece.querySelectorAll('.move[data-' + (isPromoted ? 'promoted' : 'basic') + '-enabled="1"]').forEach((move) => {
+                xMove = x + parseInt(move.getAttribute('data-x'))
+                yMove = y + parseInt(move.getAttribute('data-y'))
+                cell = document.querySelector('.cell[data-x="' + xMove + '"][data-y="' + yMove + '"]')
+
                 if (cell) {
-                    const piece = cell.querySelector('.piece')
-                    console.log(piece)
-                    if (!piece || piece.getAttribute('data-side') !== 'player') {
+                    piece = cell.querySelector('.piece')
+                    if (!piece) {
                         cell.classList.add('move-allowed')
+                    } else if (piece.getAttribute('data-side') !== 'player') {
+                        cell.classList.add('move-allowed')
+                        piece.classList.add('capture-allowed')
                     }
                 }
             })
         }
+
+        // le joueur sélectionne une pièce adverse
+        if (currentPiece.getAttribute("data-side") === 'player') {
+            // si aucune pièce n'était préalablement sélectionné ou si la pièce adverse n'est pas capturable
+            if (!selectedPiece || !currentPiece.classList.contains('capture-allowed')) {
+                return
+            }
+
+            // envoi du coup au serveur
+            const gameId = document.querySelector('#main-container').getAttribute('data-game-id')
+            socket.emit('capture-requested', gameId, selectedPiece.id, currentPiece.id)
+        }
     })
+})
+
+// Sélection d'une case
+document.querySelectorAll('.cell').forEach((cell) => {
+    cell.addEventListener('click', (e) => {
+        const currentCell = e.currentTarget
+        const currentPiece = currentCell.querySelector('.piece')
+        const selectedPiece = document.querySelector('.piece[data-selected="1"]')
+
+        // si la case contient une pièce, le fonctionnement est déjà géré
+        // si aucune pièce n'est sélectionné, il n'y a rien à faire
+        // si la case n'est pas un mouvement autorisé, il n'y a rien à faire
+        if (currentPiece || !selectedPiece || !cell.classList.contains('move-allowed')) {
+            return
+        }
+
+        // envoi du coup au serveur
+        const gameId = document.querySelector('#main-container').getAttribute('data-game-id')
+        const x = currentCell.getAttribute('data-x')
+        const y = currentCell.getAttribute('data-y')
+        socket.emit('move-requested', gameId, selectedPiece.id, x, y)
+    })
+})
+
+// Mouvement d'une pièce du joueur
+socket.on('move-played', (gameId, pieceId, x, y) => {
+    console.log('move-played', gameId, pieceId, x, y)
+
+    const piece = document.getElementById(pieceId)
+    const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
+    cell.appendChild(piece)
+
+    // on enlève la surbrillance des mouvements autorisés
+    piece.setAttribute("data-selected", "0")
+    document.querySelectorAll('.cell').forEach((cell) => {
+        cell.classList.remove('move-allowed')
+    })
+    document.querySelectorAll('.piece').forEach((piece) => {
+        piece.classList.remove('capture-allowed')
+    })
+
+    // Affichage des messages de notification
+    const newsNode = document.querySelector('#news')
+
+    const yourTurnNode = newsNode.querySelector('.your-turn')
+    yourTurnNode.style.display = 'none'
+
+    const shotNode = newsNode.querySelector('.shot-template').cloneNode(true)
+    shotNode.classList.remove('shot-template')
+    shotNode.classList.add('shot')
+    shotNode.querySelector('.piece-type').textContent = piece.getAttribute('data-type')
+    shotNode.querySelector('.coords').textContent = '(' + x + ';' + y + ')'
+    newsNode.appendChild(shotNode)
+    shotNode.style.display = 'block'
+
+    const thinkingNode = newsNode.querySelector('.thinking')
+    newsNode.appendChild(thinkingNode)
+    thinkingNode.style.display = 'block'
+})
+
+// Mouvement d'une pièce de son adversaire
+socket.on('opponent-move-played', (gameId, pieceId, x, y) => {
+    console.log('opponent-move-played', gameId, pieceId, x, y)
+
+    const piece = document.getElementById(pieceId)
+    const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
+    cell.appendChild(piece)
+
+    // Affichage des messages de notification
+    const newsNode = document.querySelector('#news')
+
+    const thinkingNode = newsNode.querySelector('.thinking')
+    thinkingNode.style.display = 'none'
+
+    const opponentShotNode = newsNode.querySelector('.opponent-shot-template').cloneNode(true)
+    opponentShotNode.classList.remove('opponent-shot-template')
+    opponentShotNode.classList.add('opponent-shot')
+    opponentShotNode.querySelector('.piece-type').textContent = piece.getAttribute('data-type')
+    opponentShotNode.querySelector('.coords').textContent = '(' + x + ';' + y + ')'
+    newsNode.appendChild(opponentShotNode)
+    opponentShotNode.style.display = 'block'
+
+    const yourTurnNode = newsNode.querySelector('.your-turn')
+    newsNode.appendChild(yourTurnNode)
+    yourTurnNode.style.display = 'block'
 })
