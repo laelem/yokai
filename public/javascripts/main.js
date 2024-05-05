@@ -33,7 +33,7 @@ socket.on('games-available', (gameList) => {
 })
 
 // Demande de création d'une nouvelle partie au serveur
-document.querySelector('#new-game').addEventListener('click', (e) => {
+document.querySelector('#new-game').addEventListener('click', () => {
     console.log('new-game-requested')
     socket.emit('new-game-requested')
 })
@@ -193,7 +193,7 @@ document.querySelectorAll('.piece').forEach((piece) => {
         }
 
         // le joueur sélectionne une pièce adverse
-        if (currentPiece.getAttribute("data-side") === 'player') {
+        if (currentPiece.getAttribute("data-side") !== 'player') {
             // si aucune pièce n'était préalablement sélectionné ou si la pièce adverse n'est pas capturable
             if (!selectedPiece || !currentPiece.classList.contains('capture-allowed')) {
                 return
@@ -228,10 +228,8 @@ document.querySelectorAll('.cell').forEach((cell) => {
     })
 })
 
-// Mouvement d'une pièce du joueur
-socket.on('move-played', (gameId, pieceId, x, y) => {
-    console.log('move-played', gameId, pieceId, x, y)
-
+function movepiece(pieceId, x, y)
+{
     const piece = document.getElementById(pieceId)
 
     const lastPiece = document.querySelector('.piece.last-played')
@@ -241,6 +239,7 @@ socket.on('move-played', (gameId, pieceId, x, y) => {
     piece.classList.add('last-played')
 
     const currentCell = piece.closest('.cell')
+
     const lastCell = document.querySelector('.cell.last-position')
     if (lastCell) {
         lastCell.classList.remove('last-position')
@@ -249,6 +248,13 @@ socket.on('move-played', (gameId, pieceId, x, y) => {
 
     const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
     cell.appendChild(piece)
+}
+
+// Mouvement d'une pièce du joueur
+socket.on('move-played', (pieceId, x, y) => {
+    console.log('move-played', pieceId, x, y)
+
+    this.movepiece(pieceId, x, y)
 
     // on enlève la surbrillance des mouvements autorisés
     piece.setAttribute("data-selected", "0")
@@ -279,25 +285,10 @@ socket.on('move-played', (gameId, pieceId, x, y) => {
 })
 
 // Mouvement d'une pièce de son adversaire
-socket.on('opponent-move-played', (gameId, pieceId, x, y) => {
-    console.log('opponent-move-played', gameId, pieceId, x, y)
+socket.on('opponent-move-played', (pieceId, x, y) => {
+    console.log('opponent-move-played', pieceId, x, y)
 
-    const piece = document.getElementById(pieceId)
-    const lastPiece = document.querySelector('.piece.last-played')
-    if (lastPiece) {
-        lastPiece.classList.remove('last-played')
-    }
-    piece.classList.add('last-played')
-
-    const currentCell = piece.closest('.cell')
-    const lastCell = document.querySelector('.cell.last-position')
-    if (lastCell) {
-        lastCell.classList.remove('last-position')
-    }
-    currentCell.classList.add('last-position')
-
-    const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
-    cell.appendChild(piece)
+    this.movepiece(pieceId, x, y)
 
     // Affichage des messages de notification
     const newsNode = document.querySelector('#news')
@@ -316,4 +307,41 @@ socket.on('opponent-move-played', (gameId, pieceId, x, y) => {
     const yourTurnNode = newsNode.querySelector('.your-turn')
     newsNode.appendChild(yourTurnNode)
     yourTurnNode.style.display = 'block'
+})
+
+// Capture d'une pièce par le joueur
+socket.on('captured-played', (pieceId, targetedPieceId) => {
+    console.log('captured-played', pieceId, targetedPieceId)
+
+    const targetedPiece = document.getElementById(targetedPieceId)
+    const targetedCell = targetedPiece.closest('.cell')
+
+    this.movepiece(pieceId, targetedCell.getAttribute('data-x'), targetedCell.getAttribute('data-y'))
+
+    // on enlève la surbrillance des mouvements autorisés
+    piece.setAttribute("data-selected", "0")
+    document.querySelectorAll('.cell').forEach((cell) => {
+        cell.classList.remove('move-allowed')
+    })
+    document.querySelectorAll('.piece').forEach((piece) => {
+        piece.classList.remove('capture-allowed')
+    })
+
+    // Affichage des messages de notification
+    const newsNode = document.querySelector('#news')
+
+    const yourTurnNode = newsNode.querySelector('.your-turn')
+    yourTurnNode.style.display = 'none'
+
+    const shotNode = newsNode.querySelector('.shot-template').cloneNode(true)
+    shotNode.classList.remove('shot-template')
+    shotNode.classList.add('shot')
+    shotNode.querySelector('.piece-type').textContent = piece.getAttribute('data-type')
+    shotNode.querySelector('.coords').textContent = '(' + x + ';' + y + ')'
+    newsNode.appendChild(shotNode)
+    shotNode.style.display = 'block'
+
+    const thinkingNode = newsNode.querySelector('.thinking')
+    newsNode.appendChild(thinkingNode)
+    thinkingNode.style.display = 'block'
 })

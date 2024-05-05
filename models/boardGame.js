@@ -21,6 +21,11 @@ class BoardGame {
         this.cells[0][2] = new Piece('kitsune-2', 'kitsune', 'p2', false)
         this.cells[0][0] = new Piece('tanuki-2', 'tanuki', 'p2', false)
         this.cells[1][1] = new Piece('kodama-2', 'kodama', 'p2', false)
+
+        this.stock = {
+            'p1': {'kodama': [], 'tanuki': [], 'kitsune': []},
+            'p2': {'kodama': [], 'tanuki': [], 'kitsune': []},
+        }
     }
 
     coordsToMoveId(x, y) {
@@ -43,7 +48,7 @@ class BoardGame {
         return null
     }
 
-    move(pieceId, xDest, yDest) {
+    move(player, pieceId, xDest, yDest) {
         const yStart = this.cells.findIndex((row) => row.find((piece) => piece && piece.id === pieceId))
 
         if (
@@ -57,9 +62,14 @@ class BoardGame {
             return false
         }
 
-        const xStart = this.cells[yStart].findIndex((piece) => piece ? piece.id === pieceId : null)
-
+        const xStart = this.cells[yStart].findIndex((piece) => piece && piece.id === pieceId)
         const piece = this.cells[yStart][xStart]
+
+        // si la pièce n'appartient pas au joueur
+        if (piece.player !== player) {
+            return false
+        }
+
         let xMove = xDest - xStart
         let yMove = yDest - yStart
         if (piece.player === 'p2') {
@@ -74,6 +84,51 @@ class BoardGame {
 
         this.cells[yStart][xStart] = null
         this.cells[yDest][xDest] = piece
+
+        return true
+    }
+
+    capture(player, pieceId, targetedPieceId) {
+        console.log('capture')
+        console.log(pieceId)
+        console.log(targetedPieceId)
+        const yStart = this.cells.findIndex((row) => row.find((piece) => piece && piece.id === pieceId))
+        const yDest = this.cells.findIndex((row) => row.find((piece) => piece && piece.id === targetedPieceId))
+
+        // si la pièce ou la pièce ciblée est introuvable
+        if (yStart === -1 || yDest === -1) {
+            return false
+        }
+
+        const xStart = this.cells[yStart].findIndex((piece) => piece && piece.id === pieceId)
+        const xDest = this.cells[yDest].findIndex((piece) => piece && piece.id === targetedPieceId)
+
+        const piece = this.cells[yStart][xStart]
+        const targetedPiece = this.cells[yDest][xDest]
+
+        // si la pièce n'appartient pas au joueur
+        // ou si la pièce ciblée n'appartient pas à son adversaire
+        if (piece.player !== player || targetedPiece.player === player) {
+            return false
+        }
+
+        let xMove = xDest - xStart
+        let yMove = yDest - yStart
+        if (piece.player === 'p2') {
+            xMove = xMove * (-1)
+            yMove = yMove * (-1)
+        }
+
+        // si le mouvement n'est pas autorisé pour ce type de pièce
+        if (!piece.moves.includes(this.coordsToMoveId(xMove, yMove))) {
+            return false
+        }
+
+        this.cells[yStart][xStart] = null
+        this.cells[yDest][xDest] = piece
+        this.stock[player][targetedPiece.type].push(targetedPiece)
+
+        console.log(this.stock)
 
         return true
     }

@@ -102,14 +102,38 @@ exports.start = (io) => {
                 return
             }
 
+            const player = currentUser === game.playerList[0] ? 'p1' : 'p2'
+
             // Mise à jour du plateau de jeu si le coup est permis
-            if (!game.boardGame.move(pieceId, x, y)) {
+            if (!game.boardGame.move(player, pieceId, x, y)) {
                 return
             }
 
             game.endTurn()
-            socket.emit('move-played', gameId, pieceId, x, y)
-            socket.to(game.id).emit('opponent-move-played', gameId, pieceId, x, y)
+            socket.emit('move-played', pieceId, x, y)
+            socket.to(game.id).emit('opponent-move-played', pieceId, x, y)
+        })
+
+        socket.on('capture-requested', function (gameId, pieceId, targetedPieceId) {
+            console.log('piece selected : ' + pieceId)
+            console.log('piece targeted : ' + targetedPieceId)
+
+            const game = data.gameList.find((game) => game.id === gameId)
+
+            if (currentUser !== game.turnPlayer) {
+                return
+            }
+
+            const player = currentUser === game.playerList[0] ? 'p1' : 'p2'
+
+            // Mise à jour du plateau de jeu si le coup est permis
+            if (!game.boardGame.capture(player, pieceId, targetedPieceId)) {
+                return
+            }
+
+            game.endTurn()
+            socket.emit('capture-played', pieceId, targetedPieceId)
+            socket.to(game.id).emit('opponent-capture-played', pieceId, targetedPieceId)
         })
     })
 }
