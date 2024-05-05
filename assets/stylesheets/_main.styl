@@ -46,13 +46,19 @@
   .cell
     margin 1px
     background-color #b5cd83
+    border 3px solid #b5cd83
+    &.last-position
+      border 3px solid #ff000087
     &.move-allowed
-      background-color lighten(#b5cd83, 10)
+      border 3px dashed #00000069
       cursor pointer
     &.river
       background-color #99c9e9
+      border 3px solid #99c9e9
+      &.last-position
+        border 3px solid #ff000087
       &.move-allowed
-        background-color lighten(#99c9e9, 10)
+        border 3px dashed #00000069
 
   // design général d'une pièce
   .piece
@@ -67,6 +73,8 @@
     .frame
       stroke-width 0.5
       fill transparent
+    &.last-played .outline
+      fill #ff34344f
     &[data-type="kodama"]
       &[data-selected="1"] .outline
         fill kodama_color + 95%

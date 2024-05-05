@@ -233,6 +233,20 @@ socket.on('move-played', (gameId, pieceId, x, y) => {
     console.log('move-played', gameId, pieceId, x, y)
 
     const piece = document.getElementById(pieceId)
+
+    const lastPiece = document.querySelector('.piece.last-played')
+    if (lastPiece) {
+        lastPiece.classList.remove('last-played')
+    }
+    piece.classList.add('last-played')
+
+    const currentCell = piece.closest('.cell')
+    const lastCell = document.querySelector('.cell.last-position')
+    if (lastCell) {
+        lastCell.classList.remove('last-position')
+    }
+    currentCell.classList.add('last-position')
+
     const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
     cell.appendChild(piece)
 
@@ -269,6 +283,19 @@ socket.on('opponent-move-played', (gameId, pieceId, x, y) => {
     console.log('opponent-move-played', gameId, pieceId, x, y)
 
     const piece = document.getElementById(pieceId)
+    const lastPiece = document.querySelector('.piece.last-played')
+    if (lastPiece) {
+        lastPiece.classList.remove('last-played')
+    }
+    piece.classList.add('last-played')
+
+    const currentCell = piece.closest('.cell')
+    const lastCell = document.querySelector('.cell.last-position')
+    if (lastCell) {
+        lastCell.classList.remove('last-position')
+    }
+    currentCell.classList.add('last-position')
+
     const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
     cell.appendChild(piece)
 
