@@ -41,8 +41,11 @@
   .stock
     background-color #eee
 
-.board-game
-  margin 10px auto
+#board-game-container
+  .board-game
+    margin 10px auto
+
+  // design d'une case
   .cell
     margin 1px
     background-color #b5cd83
@@ -73,8 +76,6 @@
     .frame
       stroke-width 0.5
       fill transparent
-    &.last-played .outline
-      fill #ff34344f
     &[data-type="kodama"]
       &[data-selected="1"] .outline
         fill kodama_color + 95%
@@ -108,6 +109,8 @@
   .piece
     display block
     margin auto
+    &.last-played .outline
+      fill #ff34344f
     &[data-side="player"] > *
       cursor pointer
     &[data-side="opponent"]
@@ -127,6 +130,13 @@
       display none
     &.capture-allowed .outline
       fill #ffb9b9
+
+  // design des réserves
+  .stock
+    align-items center
+    .piece
+      margin 0
+      padding 0
 
 
 

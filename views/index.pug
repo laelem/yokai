@@ -15,7 +15,7 @@ block content
         button#new-game.btn.btn-lg.btn-primary(type="button") Nouvelle partie
         button#join-button-template.join.btn.btn-lg.btn-outline-secondary(type="button") Rejoindre la partie <span class="number"></span>
     #main-container.row.g-0
-      #news.col
+      #news.col.overflow-auto(style={height: tileSize * 0.7 * 2 + tileSize * 4 + 20 + 'px'})
         p.message.waiting-user
           span.spinner-grow.spinner-grow-sm(aria-hidden="true")
           span.text(role="status") En attente d'un autre joueur...
@@ -36,7 +36,8 @@ block content
       #board-game-container.col.col-md-auto(style={
         width: (boardGame.xNbCell * tileSize) + 'px'
       })
-        section.stock.opponent(style={height: tileSize * 0.75 + 'px'})
+        section.stock.opponent(style={height: tileSize * 0.7 + 'px'})
+          .row.row-cols-auto.g-0
 
         -
           let moves = [
@@ -112,7 +113,8 @@ block content
                   - if (piece)
                     include piece.pug
 
-        section.stock.player(style={height: tileSize * 0.75 + 'px'})
+        section.stock.player(style={height: tileSize * 0.7 + 'px'})
+          .row.row-cols-auto.g-0
       #tchat.col
 
   // Modal affichée lorsque la partie est terminée

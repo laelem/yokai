@@ -124,8 +124,11 @@ class BoardGame {
             return false
         }
 
+        // capture de la pièce
         this.cells[yStart][xStart] = null
         this.cells[yDest][xDest] = piece
+        targetedPiece.player = player
+        targetedPiece.promoted = false
         this.stock[player][targetedPiece.type].push(targetedPiece)
 
         console.log(this.stock)
