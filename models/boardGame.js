@@ -22,10 +22,7 @@ class BoardGame {
         this.cells[0][0] = new Piece('tanuki-2', 'tanuki', 'p2', false)
         this.cells[1][1] = new Piece('kodama-2', 'kodama', 'p2', false)
 
-        this.stock = {
-            'p1': {'kodama': [], 'tanuki': [], 'kitsune': []},
-            'p2': {'kodama': [], 'tanuki': [], 'kitsune': []},
-        }
+        this.stock = {'p1': [], 'p2': []}
     }
 
     coordsToMoveId(x, y) {
@@ -50,16 +47,27 @@ class BoardGame {
 
     move(player, pieceId, xDest, yDest) {
         const yStart = this.cells.findIndex((row) => row.find((piece) => piece && piece.id === pieceId))
+        const pieceInStock = this.stock[player].find((piece) => piece.id === pieceId)
 
         if (
-            // si la pièce est introuvable
-            yStart === -1
+            // si la pièce est introuvable, ni sur le plateau ni dans la réserve
+            (yStart === -1 && !pieceInStock)
             // ou si la case de destination n'existe pas
             || typeof this.cells[yDest] === 'undefined' || typeof this.cells[yDest][xDest] === 'undefined'
             // ou si la case de destination n'est pas vide
             || this.cells[yDest][xDest] !== null
         ) {
             return false
+        }
+
+        if (pieceInStock) {
+            // suppression de la pièce de la réserve
+            const pieceInStockIndex = this.stock[player].findIndex((piece) => piece.id === pieceId)
+            this.stock[player].splice(pieceInStockIndex, 1)
+
+            // insertion de la pièce dans le plateau de jeu
+            this.cells[yDest][xDest] = pieceInStock
+            return true
         }
 
         const xStart = this.cells[yStart].findIndex((piece) => piece && piece.id === pieceId)
@@ -89,9 +97,6 @@ class BoardGame {
     }
 
     capture(player, pieceId, targetedPieceId) {
-        console.log('capture')
-        console.log(pieceId)
-        console.log(targetedPieceId)
         const yStart = this.cells.findIndex((row) => row.find((piece) => piece && piece.id === pieceId))
         const yDest = this.cells.findIndex((row) => row.find((piece) => piece && piece.id === targetedPieceId))
 
@@ -129,7 +134,7 @@ class BoardGame {
         this.cells[yDest][xDest] = piece
         targetedPiece.player = player
         targetedPiece.promoted = false
-        this.stock[player][targetedPiece.type].push(targetedPiece)
+        this.stock[player].push(targetedPiece)
 
         console.log(this.stock)
 

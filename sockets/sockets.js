@@ -109,6 +109,9 @@ exports.start = (io) => {
                 return
             }
 
+            console.log(game.boardGame.cells)
+            console.log(game.boardGame.stock)
+
             game.endTurn()
             socket.emit('move-played', pieceId, x, y)
             socket.to(game.id).emit('opponent-move-played', pieceId, x, y)
@@ -132,8 +135,8 @@ exports.start = (io) => {
             }
 
             game.endTurn()
-            socket.emit('capture-played', pieceId, targetedPieceId)
-            socket.to(game.id).emit('opponent-capture-played', pieceId, targetedPieceId)
+            socket.emit('capture-played', 'player', pieceId, targetedPieceId)
+            socket.to(game.id).emit('capture-played', 'opponent', pieceId, targetedPieceId)
         })
     })
 }

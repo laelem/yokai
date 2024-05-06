@@ -25,7 +25,10 @@ function movePiece(piece, x, y)
     if (lastCell) {
         lastCell.classList.remove('last-position')
     }
-    currentCell.classList.add('last-position')
+
+    if (currentCell) {
+        currentCell.classList.add('last-position')
+    }
 
     const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
     cell.appendChild(piece)
@@ -91,53 +94,6 @@ document.querySelectorAll('.piece').forEach((piece) => {
         const isPromoted = (currentPiece.getAttribute('data-is-promoted') === '1')
         const selectedPiece = document.querySelector('.piece[data-selected="1"]')
 
-        // le joueur sélectionne une de ses pièces
-        if (currentPiece.getAttribute("data-side") === 'player') {
-            // une pièce était déjà sélectionnée : on enlève sa surbrillance et la surbrillance des mouvements autorisés
-            if (selectedPiece) {
-                this.unselect(selectedPiece)
-            }
-
-            // si la pièce est la même, on ne fait rien
-            if (selectedPiece === currentPiece) {
-                return
-            }
-
-            // si elle est différente, on la met en surbrillance
-            currentPiece.setAttribute('data-selected', '1')
-
-            // si la pièce n'est pas dans une case, il s'agit d'une pièce provenant de la réserve
-            if (!currentCell) {
-                // Mise en surbrillance des cases autorisées pour un parachutage
-                document.querySelectorAll('.cell').forEach((cell) => {
-                    if(!cell.querySelector('.piece')) {
-                        cell.classList.add('move-allowed')
-                    }
-                })
-                return
-            }
-
-            // Si la pièce est sur le plateau, on met en surbrillance les cases autorisées pour un mouvement
-            let xMove, yMove, cell, piece
-            const x = parseInt(currentCell.getAttribute('data-x'))
-            const y = parseInt(currentCell.getAttribute('data-y'))
-            currentPiece.querySelectorAll('.move[data-' + (isPromoted ? 'promoted' : 'basic') + '-enabled="1"]').forEach((move) => {
-                xMove = x + parseInt(move.getAttribute('data-x'))
-                yMove = y + parseInt(move.getAttribute('data-y'))
-                cell = document.querySelector('.cell[data-x="' + xMove + '"][data-y="' + yMove + '"]')
-
-                if (cell) {
-                    piece = cell.querySelector('.piece')
-                    if (!piece) {
-                        cell.classList.add('move-allowed')
-                    } else if (piece.getAttribute('data-side') !== 'player') {
-                        cell.classList.add('move-allowed')
-                        piece.classList.add('capture-allowed')
-                    }
-                }
-            })
-        }
-
         // le joueur sélectionne une pièce adverse
         if (currentPiece.getAttribute("data-side") !== 'player') {
             // si aucune pièce n'était préalablement sélectionné ou si la pièce adverse n'est pas capturable
@@ -148,7 +104,55 @@ document.querySelectorAll('.piece').forEach((piece) => {
             // envoi du coup au serveur
             const gameId = document.querySelector('#main-container').getAttribute('data-game-id')
             socket.emit('capture-requested', gameId, selectedPiece.id, currentPiece.id)
+
+            return
         }
+
+        // le joueur sélectionne une de ses pièces :
+
+        // une pièce était déjà sélectionnée : on enlève sa surbrillance et la surbrillance des mouvements autorisés
+        if (selectedPiece) {
+            this.unselect(selectedPiece)
+        }
+
+        // si la pièce est la même, on ne fait rien
+        if (selectedPiece === currentPiece) {
+            return
+        }
+
+        // si elle est différente, on la met en surbrillance
+        currentPiece.setAttribute('data-selected', '1')
+
+        // si la pièce n'est pas dans une case, il s'agit d'une pièce provenant de la réserve
+        if (!currentCell) {
+            // Mise en surbrillance des cases autorisées pour un parachutage
+            document.querySelectorAll('.cell').forEach((cell) => {
+                if(!cell.querySelector('.piece')) {
+                    cell.classList.add('move-allowed')
+                }
+            })
+            return
+        }
+
+        // Si la pièce est sur le plateau, on met en surbrillance les cases autorisées pour un mouvement
+        let xMove, yMove, cell, piece
+        const x = parseInt(currentCell.getAttribute('data-x'))
+        const y = parseInt(currentCell.getAttribute('data-y'))
+        currentPiece.querySelectorAll('.move[data-' + (isPromoted ? 'promoted' : 'basic') + '-enabled="1"]').forEach((move) => {
+            xMove = x + parseInt(move.getAttribute('data-x'))
+            yMove = y + parseInt(move.getAttribute('data-y'))
+            cell = document.querySelector('.cell[data-x="' + xMove + '"][data-y="' + yMove + '"]')
+
+            if (cell) {
+                piece = cell.querySelector('.piece')
+                if (!piece) {
+                    cell.classList.add('move-allowed')
+                } else if (piece.getAttribute('data-side') !== 'player') {
+                    cell.classList.add('move-allowed')
+                    piece.classList.add('capture-allowed')
+                }
+            }
+        })
     })
 })
 
@@ -179,6 +183,15 @@ socket.on('move-played', (pieceId, x, y) => {
     console.log('move-played', pieceId, x, y)
 
     const piece = document.getElementById(pieceId)
+
+    // si la pièce vient de la réserve, on l'agrandit avant parachutage
+    if (!piece.closest('.cell')) {
+        const tileSize = piece.getAttribute('width')
+        piece.setAttribute('width', (tileSize * 1.25).toString())
+        piece.setAttribute('height', (tileSize * 1.25).toString())
+        piece.classList.remove('col')
+    }
+
     this.movePiece(piece, x, y)
     this.unselect(piece)
 
@@ -205,8 +218,8 @@ socket.on('opponent-move-played', (pieceId, x, y) => {
     this.notifyOpponentEndTurn(piece, x, y)
 })
 
-// Capture d'une pièce par le joueur
-socket.on('capture-played', (pieceId, targetedPieceId) => {
+// Capture d'une pièce par un joueur
+socket.on('capture-played', (side, pieceId, targetedPieceId) => {
     console.log('capture-played', pieceId, targetedPieceId)
 
     const main = document.querySelector('#main-container')
@@ -223,54 +236,24 @@ socket.on('capture-played', (pieceId, targetedPieceId) => {
 
     // on place la pièce capturée dans la réserve
     targetedPiece.setAttribute('data-is-promoted', '0')
-    targetedPiece.setAttribute('data-side', 'player')
+    targetedPiece.setAttribute('data-side', side)
     targetedPiece.setAttribute('data-player', player)
 
+    // on rétrécit sa taille
     const tileSize = targetedPiece.getAttribute('width')
     targetedPiece.setAttribute('width', (tileSize * 0.75).toString())
     targetedPiece.setAttribute('height', (tileSize * 0.75).toString())
     targetedPiece.classList.add('col')
 
-    document.querySelector('.stock.player .row').appendChild(targetedPiece)
+    document.querySelector('.stock.' + side + ' .row').appendChild(targetedPiece)
 
     // On enregistre la fin de tour
     main.setAttribute('data-turn', player === 'p1' ? 'p2' : 'p1')
 
     // Affichage des messages de notification
-    this.notifyPlayerEndTurn(piece, xDest, yDest)
-})
-
-// Capture d'une pièce par l'adversaire
-socket.on('opponent-capture-played', (pieceId, targetedPieceId) => {
-    console.log('opponent-capture-played', pieceId, targetedPieceId)
-
-    const main = document.querySelector('#main-container')
-    const player = main.getAttribute('data-turn')
-
-    const piece = document.getElementById(pieceId)
-    const targetedPiece = document.getElementById(targetedPieceId)
-    const targetedCell = targetedPiece.closest('.cell')
-    const xDest = targetedCell.getAttribute('data-x')
-    const yDest = targetedCell.getAttribute('data-y')
-
-    this.movePiece(piece, xDest, yDest)
-    this.unselect(piece)
-
-    // on place la pièce capturée dans la réserve
-    targetedPiece.setAttribute('data-is-promoted', '0')
-    targetedPiece.setAttribute('data-side', 'opponent')
-    targetedPiece.setAttribute('data-player', player)
-
-    const tileSize = targetedPiece.getAttribute('width')
-    targetedPiece.setAttribute('width', (tileSize * 0.75).toString())
-    targetedPiece.setAttribute('height', (tileSize * 0.75).toString())
-    targetedPiece.classList.add('col')
-
-    document.querySelector('.stock.opponent .row').appendChild(targetedPiece)
-
-    // On enregistre la fin de tour
-    main.setAttribute('data-turn', player === 'p1' ? 'p2' : 'p1')
-
-    // Affichage des messages de notification
-    this.notifyOpponentEndTurn(piece, xDest, yDest)
+    if (side === 'player') {
+        this.notifyPlayerEndTurn(piece, xDest, yDest)
+    } else {
+        this.notifyOpponentEndTurn(piece, xDest, yDest)
+    }
 })
