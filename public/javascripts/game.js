@@ -11,7 +11,7 @@ function unselect(selectedPiece)
     })
 }
 
-function movePiece(piece, x, y)
+function movePiece(player, piece, x, y)
 {
     const lastPiece = document.querySelector('.piece.last-played')
     if (lastPiece) {
@@ -30,7 +30,25 @@ function movePiece(piece, x, y)
         currentCell.classList.add('last-position')
     }
 
+    // si la pièce vient de la réserve, on l'agrandit avant parachutage
+    if (!currentCell) {
+        const tileSize = piece.getAttribute('width')
+        piece.setAttribute('width', (tileSize * 1.25).toString())
+        piece.setAttribute('height', (tileSize * 1.25).toString())
+        piece.classList.remove('col')
+    }
+
     const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
+
+    // promotion éventuelle
+    if (
+        currentCell
+        && piece.classList.contains('has-promotion')
+        && cell.classList.contains(player + '-promotion-zone')
+    ) {
+        piece.setAttribute('data-is-promoted', '1')
+    }
+
     cell.appendChild(piece)
 }
 
@@ -182,22 +200,15 @@ document.querySelectorAll('.cell').forEach((cell) => {
 socket.on('move-played', (pieceId, x, y) => {
     console.log('move-played', pieceId, x, y)
 
+    const main = document.querySelector('#main-container')
+    const player = main.getAttribute('data-turn')
     const piece = document.getElementById(pieceId)
 
-    // si la pièce vient de la réserve, on l'agrandit avant parachutage
-    if (!piece.closest('.cell')) {
-        const tileSize = piece.getAttribute('width')
-        piece.setAttribute('width', (tileSize * 1.25).toString())
-        piece.setAttribute('height', (tileSize * 1.25).toString())
-        piece.classList.remove('col')
-    }
-
-    this.movePiece(piece, x, y)
+    this.movePiece(player, piece, x, y)
     this.unselect(piece)
 
     // On enregistre la fin de tour
-    const main = document.querySelector('#main-container')
-    main.setAttribute('data-turn', main.getAttribute('data-turn') === 'p1' ? 'p2' : 'p1')
+    main.setAttribute('data-turn', player === 'p1' ? 'p2' : 'p1')
 
     // Affichage des messages de notification
     this.notifyPlayerEndTurn(piece, x, y)
@@ -207,12 +218,14 @@ socket.on('move-played', (pieceId, x, y) => {
 socket.on('opponent-move-played', (pieceId, x, y) => {
     console.log('opponent-move-played', pieceId, x, y)
 
+    const main = document.querySelector('#main-container')
+    const opponent = main.getAttribute('data-turn')
     const piece = document.getElementById(pieceId)
-    this.movePiece(piece, x, y)
+
+    this.movePiece(opponent, piece, x, y)
 
     // On enregistre la fin de tour
-    const main = document.querySelector('#main-container')
-    main.setAttribute('data-turn', main.getAttribute('data-turn') === 'p1' ? 'p2' : 'p1')
+    main.setAttribute('data-turn', opponent === 'p1' ? 'p2' : 'p1')
 
     // Affichage des messages de notification
     this.notifyOpponentEndTurn(piece, x, y)
@@ -231,7 +244,7 @@ socket.on('capture-played', (side, pieceId, targetedPieceId) => {
     const xDest = targetedCell.getAttribute('data-x')
     const yDest = targetedCell.getAttribute('data-y')
 
-    this.movePiece(piece, xDest, yDest)
+    this.movePiece(player, piece, xDest, yDest)
     this.unselect(piece)
 
     // on place la pièce capturée dans la réserve

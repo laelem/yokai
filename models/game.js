@@ -11,6 +11,7 @@ class Game {
         this.turnPlayer = null
         this.turnPlayerIndex = null
         this.boardGame = new BoardGame(3, 4)
+        this.winner = null
     }
 
     join(user) {

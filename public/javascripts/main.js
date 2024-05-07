@@ -134,14 +134,22 @@ socket.on('other-player-joined', (opponent, amIFirstPlayer) => {
 })
 
 // Fin de partie (gagné, perdu ou l'autre joueur s'est déconnecté)
-socket.on('game-over', (why, opponent) => {
+socket.on('game-over', (why) => {
     // On enregistre la fin de tour
     document.querySelector('#main-container').removeAttribute('data-turn')
+    const yourTurnNode = document.querySelector('#news .your-turn')
+    if (yourTurnNode) {
+        yourTurnNode.style.display = 'none'
+    }
+
+    // gestion des messages de notification
+    document.querySelector('#news .thinking').style.display = 'none'
+    const message = document.querySelector('#news .' + why)
+    document.querySelector('#news').appendChild(message)
+    message.style.display = 'block'
 
     // on affiche une modal
     const gameOverModal = new bootstrap.Modal('#game-over-modal')
-    document.querySelector('#news .thinking').style.display = 'none'
-    document.querySelector('#news .' + why).style.display = 'block'
     document.querySelector('#game-over-modal .' + why).style.display = 'block'
     gameOverModal.show()
 })

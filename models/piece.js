@@ -27,6 +27,14 @@ class Piece {
         this.moves = this.promoted ? this.promotedMoves : this.basicMoves
     }
 
+    hasPromotion() {
+        return this.promotedMoves.length > 0
+    }
+
+    canBePromoted() {
+        return !this.promoted && this.promotedMoves.length > 0
+    }
+
     promote() {
         this.promoted = true
         this.moves = this.promotedMoves

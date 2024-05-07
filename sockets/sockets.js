@@ -83,8 +83,9 @@ exports.start = (io) => {
                 const gameIndex = data.gameList.findIndex((game) => game.id === room)
                 data.gameList.splice(gameIndex, 1)
 
+                // si la partie n'est pas terminée
                 // on prévient le potentiel joueur restant que son adversaire est parti
-                if (game.activePlayerList.length === 1) {
+                if (!game.winner && game.activePlayerList.length === 1) {
                     socket.to(game.id).emit('game-over', 'other-player-left', currentUser)
                 }
 
@@ -108,10 +109,7 @@ exports.start = (io) => {
             if (!game.boardGame.move(player, pieceId, x, y)) {
                 return
             }
-
             console.log(game.boardGame.cells)
-            console.log(game.boardGame.stock)
-
             game.endTurn()
             socket.emit('move-played', pieceId, x, y)
             socket.to(game.id).emit('opponent-move-played', pieceId, x, y)
@@ -137,6 +135,12 @@ exports.start = (io) => {
             game.endTurn()
             socket.emit('capture-played', 'player', pieceId, targetedPieceId)
             socket.to(game.id).emit('capture-played', 'opponent', pieceId, targetedPieceId)
+
+            if (game.boardGame.koropokkuruCaptured === true) {
+                game.winner = currentUser
+                socket.emit('game-over', 'win')
+                socket.to(game.id).emit('game-over', 'loose')
+            }
         })
     })
 }

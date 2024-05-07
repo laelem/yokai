@@ -4,6 +4,7 @@ class BoardGame {
     constructor(xNbCell, yNbCell) {
         this.xNbCell = xNbCell
         this.yNbCell = yNbCell
+        this.yPromotionZone = 0
 
         this.cells = []
         for (let y=0; y<yNbCell; y++) {
@@ -23,6 +24,15 @@ class BoardGame {
         this.cells[1][1] = new Piece('kodama-2', 'kodama', 'p2', false)
 
         this.stock = {'p1': [], 'p2': []}
+
+        this.koropokkuruCaptured = false
+    }
+
+    isInPromotionZone(y, player) {
+        return (
+            (player === 'p1' && y <= this.yPromotionZone)
+            || (player === 'p2' && y >= this.yNbCell - 1 - this.yPromotionZone)
+        )
     }
 
     coordsToMoveId(x, y) {
@@ -90,6 +100,11 @@ class BoardGame {
             return false
         }
 
+        if (this.isInPromotionZone(yDest, player) && piece.canBePromoted()) {
+            piece.promote()
+        }
+
+        // déplacement de la pièce
         this.cells[yStart][xStart] = null
         this.cells[yDest][xDest] = piece
 
@@ -129,14 +144,23 @@ class BoardGame {
             return false
         }
 
+        // si la pièce ciblée est le koropokkuru => fin de partie
+        if (targetedPiece.type === 'koropokkuru') {
+            this.koropokkuruCaptured = true
+            return true
+        }
+
+        // promotion éventuelle
+        if (this.isInPromotionZone(yDest, player) && piece.canBePromoted()) {
+            piece.promote()
+        }
+
         // capture de la pièce
         this.cells[yStart][xStart] = null
         this.cells[yDest][xDest] = piece
         targetedPiece.player = player
         targetedPiece.promoted = false
         this.stock[player].push(targetedPiece)
-
-        console.log(this.stock)
 
         return true
     }

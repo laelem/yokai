@@ -57,13 +57,17 @@ block content
         })
           each row, y in boardGame.cells
             .d-table-row
+            -
+              let zone = 'river'
+              if (y <= boardGame.yPromotionZone) { zone = 'p1-promotion-zone' }
+              if (y >= boardGame.yNbCell - 1 - boardGame.yPromotionZone) { zone = 'p2-promotion-zone' }
             each piece, x in row
               .tile.d-table-cell(style={
                 width: tileSize + 'px',
                 height: tileSize + 'px'
               })
                 div(
-                  class='cell' + (y > 0 && y < 3 ? ' river' : '')
+                  class='cell ' + zone
                   data-x=x
                   data-y=y
                   style={
@@ -93,6 +97,10 @@ block content
           - let reversedCells = boardGame.cells.reverse()
           each row, y in reversedCells
             .d-table-row
+            -
+              let zone = 'river'
+              if (y <= boardGame.yPromotionZone) { zone = 'p2-promotion-zone' }
+              if (y >= boardGame.yNbCell - 1 - boardGame.yPromotionZone) { zone = 'p1-promotion-zone' }
             - let reversedRow = row.reverse()
             - let mirrorY = boardGame.yNbCell - y - 1
             each piece, x in reversedRow
@@ -102,7 +110,7 @@ block content
                 height: tileSize + 'px'
               })
                 div(
-                  class='cell' + (y > 0 && y < 3 ? ' river' : '')
+                  class='cell ' + zone
                   data-x=mirrorX
                   data-y=mirrorY
                   style={

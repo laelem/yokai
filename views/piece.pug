@@ -8,7 +8,7 @@ svg(
   data-player=piece.player
   data-side='player'
   data-is-promoted=(piece.promoted ? '1' : '0')
-  class="piece"
+  class='piece' + (piece.hasPromotion() ? ' has-promotion' : '')
 )
   path.outline(d='M 50 15, 75 23, 85 85, 15 85, 25 23, Z')
   rect.frame(
