@@ -109,10 +109,16 @@ exports.start = (io) => {
             if (!game.boardGame.move(player, pieceId, x, y)) {
                 return
             }
-            console.log(game.boardGame.cells)
+
             game.endTurn()
             socket.emit('move-played', pieceId, x, y)
             socket.to(game.id).emit('opponent-move-played', pieceId, x, y)
+
+            if (game.boardGame.koropokkuruPromoted === true) {
+                game.winner = currentUser
+                socket.emit('game-over', 'win')
+                socket.to(game.id).emit('game-over', 'loose')
+            }
         })
 
         socket.on('capture-requested', function (gameId, pieceId, targetedPieceId) {
@@ -136,7 +142,7 @@ exports.start = (io) => {
             socket.emit('capture-played', 'player', pieceId, targetedPieceId)
             socket.to(game.id).emit('capture-played', 'opponent', pieceId, targetedPieceId)
 
-            if (game.boardGame.koropokkuruCaptured === true) {
+            if (game.boardGame.koropokkuruPromoted === true || game.boardGame.koropokkuruCaptured === true) {
                 game.winner = currentUser
                 socket.emit('game-over', 'win')
                 socket.to(game.id).emit('game-over', 'loose')

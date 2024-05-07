@@ -3,7 +3,8 @@ extends layout
 block content
   #main.container
     header#header.row.g-0.py-3.border-bottom
-      .col.py-3
+      .col.py-3.actions
+        button#rules.btn.btn-sm.btn-outline-secondary(type="button" onclick='window.open("' + rulesLink + '", "_blank")') Règles du jeu
         button#leave-game.btn.btn-sm.btn-outline-danger(type="button" onclick="window.location.reload()") Quitter
       .col
         h1.text-center.display-3= __('app.name')

@@ -17,7 +17,7 @@ class BoardGame {
         this.cells[3][1] = new Piece('koropokkuru-1', 'koropokkuru', 'p1', false)
         this.cells[3][0] = new Piece('kitsune-1', 'kitsune', 'p1', false)
         this.cells[3][2] = new Piece('tanuki-1', 'tanuki', 'p1', false)
-        this.cells[2][1] = new Piece('kodama-1', 'kodama', 'p1', true)
+        this.cells[2][1] = new Piece('kodama-1', 'kodama', 'p1', false)
         this.cells[0][1] = new Piece('koropokkuru-2', 'koropokkuru', 'p2', false)
         this.cells[0][2] = new Piece('kitsune-2', 'kitsune', 'p2', false)
         this.cells[0][0] = new Piece('tanuki-2', 'tanuki', 'p2', false)
@@ -26,6 +26,7 @@ class BoardGame {
         this.stock = {'p1': [], 'p2': []}
 
         this.koropokkuruCaptured = false
+        this.koropokkuruPromoted = false
     }
 
     isInPromotionZone(y, player) {
@@ -100,7 +101,14 @@ class BoardGame {
             return false
         }
 
-        if (this.isInPromotionZone(yDest, player) && piece.canBePromoted()) {
+        // si la pièce qui se déplace est le koropokkuru et qu'il arrive en zone promue => fin de partie
+        const isInPromotionZone = this.isInPromotionZone(yDest, player)
+        if (piece.type === 'koropokkuru' && isInPromotionZone) {
+            this.koropokkuruPromoted = true
+        }
+
+        // promotion éventuelle
+        if (isInPromotionZone && piece.canBePromoted()) {
             piece.promote()
         }
 
@@ -147,11 +155,16 @@ class BoardGame {
         // si la pièce ciblée est le koropokkuru => fin de partie
         if (targetedPiece.type === 'koropokkuru') {
             this.koropokkuruCaptured = true
-            return true
+        }
+
+        // si la pièce qui se déplace est le koropokkuru et qu'il arrive en zone promue => fin de partie
+        const isInPromotionZone = this.isInPromotionZone(yDest, player)
+        if (piece.type === 'koropokkuru' && isInPromotionZone) {
+            this.koropokkuruPromoted = true
         }
 
         // promotion éventuelle
-        if (this.isInPromotionZone(yDest, player) && piece.canBePromoted()) {
+        if (isInPromotionZone && piece.canBePromoted()) {
             piece.promote()
         }
 

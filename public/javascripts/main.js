@@ -4,7 +4,7 @@ function displayBoard(game) {
     document.querySelector('#choose-game').style.display = 'none'
     document.querySelector('#game-number .number').textContent = game.number
     document.querySelector('#game-number').style.display = 'block'
-    document.querySelector('#leave-game').style.display = 'block'
+    document.querySelector('#leave-game').style.display = 'inline-block'
     document.querySelector('#main-container').setAttribute('data-game-id', game.id)
     document.querySelector('#main-container').style.display = 'flex'
 }
