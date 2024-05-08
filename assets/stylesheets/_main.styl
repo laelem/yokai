@@ -79,6 +79,12 @@
     .frame
       stroke-width 0.5
       fill transparent
+    .number-icon
+      fill red
+      stroke white
+    .number-text
+      fill white
+      font 15px sans-serif
     &[data-type="kodama"]
       &[data-selected="1"] .outline
         fill kodama_color + 95%
@@ -112,6 +118,8 @@
   .piece
     display block
     margin auto
+    .number-icon, .number-text
+      display none
     &.last-played .outline
       fill #ff34344f
     &[data-side="player"] > *
@@ -119,6 +127,9 @@
     &[data-side="opponent"]
       transform-origin 50% 50%
       transform scale(1,-1)
+      .number-icon, .number-text
+        transform-origin 50% 50%
+        transform scale(1,-1)
     & .promotion-sign
       display none
     &[data-is-promoted="1"] .promotion-sign

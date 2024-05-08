@@ -5,7 +5,7 @@ block content
     header#header.row.g-0.py-3.border-bottom
       .col.py-3.actions
         button#rules.btn.btn-sm.btn-outline-secondary(type="button" onclick='window.open("' + rulesLink + '", "_blank")') Règles du jeu
-        button#leave-game.btn.btn-sm.btn-outline-danger(type="button" onclick="window.location.reload()") Quitter
+        button#leave-game.btn.btn-sm.btn-outline-danger(type="button" data-bs-toggle="modal" data-bs-target="#quit-confirm-modal") Quitter
       .col
         h1.text-center.display-3= __('app.name')
         h2#game-number.display-6.text-center Partie #<span class="number"></span>
@@ -140,3 +140,16 @@ block content
         .modal-footer
           button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Voir le plateau
           button.btn.btn-primary(type='button' onclick="window.location.reload()") Rejouer
+
+  // Modal de confirmation avant de quitter le jeu
+  #quit-confirm-modal.modal.fade(tabindex='-1')
+    .modal-dialog
+      .modal-content
+        .modal-header
+          h1.modal-title.fs-5 Quitter la partie
+          button.btn-close(type='button' data-bs-dismiss='modal')
+        .modal-body
+          p Êtes-vous sûr de vouloir quitter la partie ?
+        .modal-footer
+          button.btn.btn-primary(type='button' onclick="window.location.reload()") Oui
+          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Non

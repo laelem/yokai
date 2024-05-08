@@ -111,8 +111,8 @@ exports.start = (io) => {
             }
 
             game.endTurn()
-            socket.emit('move-played', pieceId, x, y)
-            socket.to(game.id).emit('opponent-move-played', pieceId, x, y)
+            socket.emit('move-played', 'player', pieceId, x, y)
+            socket.to(game.id).emit('move-played', 'opponent', pieceId, x, y)
 
             if (game.boardGame.koropokkuruPromoted === true) {
                 game.winner = currentUser

@@ -20,6 +20,7 @@ function movePiece(player, piece, x, y)
     piece.classList.add('last-played')
 
     const currentCell = piece.closest('.cell')
+    const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
 
     const lastCell = document.querySelector('.cell.last-position')
     if (lastCell) {
@@ -30,20 +31,47 @@ function movePiece(player, piece, x, y)
         currentCell.classList.add('last-position')
     }
 
-    // si la pièce vient de la réserve, on l'agrandit avant parachutage
+    // si la pièce vient de la réserve
     if (!currentCell) {
-        const tileSize = piece.getAttribute('width')
-        piece.setAttribute('width', (tileSize * 1.25).toString())
-        piece.setAttribute('height', (tileSize * 1.25).toString())
-        piece.classList.remove('col')
-    }
+        const stock = piece.closest('.stock')
 
-    const cell = document.querySelector('.cell[data-x="' + x + '"][data-y="' + y + '"]')
+        // on l'agrandit avant parachutage
+        const tileSize = piece.getAttribute('width')
+        piece.setAttribute('width', (tileSize * (4/3)).toString())
+        piece.setAttribute('height', (tileSize * (4/3)).toString())
+        piece.classList.remove('col')
+
+        piece.querySelector('.number-icon').style.display = 'none'
+        piece.querySelector('.number-text').style.display = 'none'
+        cell.appendChild(piece)
+
+        // on recalcule le nombre de pièces du même type restant en réserve
+        const pieceType = piece.getAttribute('data-type')
+        const piecesInStock = stock.querySelectorAll('.piece[data-type="' + pieceType + '"]')
+
+        if (piecesInStock.length === 0) {
+            return
+        }
+
+        if (piecesInStock.length === 1) {
+            piecesInStock[0].querySelector('.number-icon').style.display = 'none'
+            piecesInStock[0].querySelector('.number-text').style.display = 'none'
+            piecesInStock[0].style.display = 'block'
+            return
+        }
+
+        // si plus d'une pièce du même type reste en réserve
+        const numberNode = targetedPiece.querySelector('.number-text')
+        numberNode.textContent = piecesInStock.length.toString()
+        piecesInStock[0].querySelector('.number-icon').style.display = 'block'
+        piecesInStock[0].querySelector('.number-text').style.display = 'block'
+        piecesInStock[0].style.display = 'block'
+        return
+    }
 
     // promotion éventuelle
     if (
-        currentCell
-        && piece.classList.contains('has-promotion')
+        piece.classList.contains('has-promotion')
         && cell.classList.contains(player + '-promotion-zone')
     ) {
         piece.setAttribute('data-is-promoted', '1')
@@ -196,9 +224,9 @@ document.querySelectorAll('.cell').forEach((cell) => {
     })
 })
 
-// Mouvement d'une pièce du joueur
-socket.on('move-played', (pieceId, x, y) => {
-    console.log('move-played', pieceId, x, y)
+// Mouvement d'une pièce par un joueur
+socket.on('move-played', (side, pieceId, x, y) => {
+    console.log('move-played', side, pieceId, x, y)
 
     const main = document.querySelector('#main-container')
     const player = main.getAttribute('data-turn')
@@ -211,24 +239,11 @@ socket.on('move-played', (pieceId, x, y) => {
     main.setAttribute('data-turn', player === 'p1' ? 'p2' : 'p1')
 
     // Affichage des messages de notification
-    this.notifyPlayerEndTurn(piece, x, y)
-})
-
-// Mouvement d'une pièce de son adversaire
-socket.on('opponent-move-played', (pieceId, x, y) => {
-    console.log('opponent-move-played', pieceId, x, y)
-
-    const main = document.querySelector('#main-container')
-    const opponent = main.getAttribute('data-turn')
-    const piece = document.getElementById(pieceId)
-
-    this.movePiece(opponent, piece, x, y)
-
-    // On enregistre la fin de tour
-    main.setAttribute('data-turn', opponent === 'p1' ? 'p2' : 'p1')
-
-    // Affichage des messages de notification
-    this.notifyOpponentEndTurn(piece, x, y)
+    if (side === 'player') {
+        this.notifyPlayerEndTurn(piece, x, y)
+    } else {
+        this.notifyOpponentEndTurn(piece, x, y)
+    }
 })
 
 // Capture d'une pièce par un joueur
@@ -240,6 +255,7 @@ socket.on('capture-played', (side, pieceId, targetedPieceId) => {
 
     const piece = document.getElementById(pieceId)
     const targetedPiece = document.getElementById(targetedPieceId)
+    const pieceType = targetedPiece.getAttribute('data-type')
     const targetedCell = targetedPiece.closest('.cell')
     const xDest = targetedCell.getAttribute('data-x')
     const yDest = targetedCell.getAttribute('data-y')
@@ -247,18 +263,29 @@ socket.on('capture-played', (side, pieceId, targetedPieceId) => {
     this.movePiece(player, piece, xDest, yDest)
     this.unselect(piece)
 
-    // on place la pièce capturée dans la réserve
+    // on capture la pièce
     targetedPiece.setAttribute('data-is-promoted', '0')
     targetedPiece.setAttribute('data-side', side)
     targetedPiece.setAttribute('data-player', player)
 
-    // on rétrécit sa taille
+    // on rétrécit sa taille avant de la placer dans la réserve
     const tileSize = targetedPiece.getAttribute('width')
-    targetedPiece.setAttribute('width', (tileSize * 0.75).toString())
-    targetedPiece.setAttribute('height', (tileSize * 0.75).toString())
+    targetedPiece.setAttribute('width', (tileSize * (3/4)).toString())
+    targetedPiece.setAttribute('height', (tileSize * (3/4)).toString())
     targetedPiece.classList.add('col')
 
-    document.querySelector('.stock.' + side + ' .row').appendChild(targetedPiece)
+    const stock = document.querySelector('.stock.' + side + ' .row')
+    const piecesInStock = stock.querySelectorAll('.piece[data-type="' + pieceType + '"]')
+    if (piecesInStock.length === 0) {
+        stock.appendChild(targetedPiece)
+    } else {
+        piecesInStock[0].style.display = 'none'
+        const numberNode = targetedPiece.querySelector('.number-text')
+        numberNode.textContent = (piecesInStock.length + 1).toString()
+        numberNode.style.display = 'block'
+        targetedPiece.querySelector('.number-icon').style.display = 'block'
+        stock.insertBefore(targetedPiece, piecesInStock[0])
+    }
 
     // On enregistre la fin de tour
     main.setAttribute('data-turn', player === 'p1' ? 'p2' : 'p1')
