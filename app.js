@@ -18,6 +18,9 @@ app.set('view engine', 'pug')
 app.use(express.static('public'))
 app.use(express.static(__dirname + '/node_modules/bootstrap/dist/js'));
 
+// support URL-encoded bodies
+app.use(express.urlencoded({extended: true}));
+
 i18n.configure({
     locales: ['fr'],
     defaultLocale: 'fr',
@@ -29,9 +32,7 @@ app.use(i18n.init)
 
 socketsManagement.start(io)
 
-server.listen(port, function() {
-    console.log(`Listening on port ${port}`)
-})
+server.listen(port)
 
 app.use('/', indexRouter)
 

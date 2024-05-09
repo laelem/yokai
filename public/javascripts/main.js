@@ -1,5 +1,7 @@
 const socket = io()
 
+socket.emit('logged-in')
+
 function displayBoard(game) {
     document.querySelector('#choose-game').style.display = 'none'
     document.querySelector('#game-number .number').textContent = game.number
@@ -11,13 +13,11 @@ function displayBoard(game) {
 
 // Connexion d'un nouvel utilisateur
 socket.on('user-connected', (user) => {
-    console.log('user connected : ' + user.pseudo)
     document.querySelector('#user-panel .pseudo').textContent = user.pseudo
 })
 
 // Affichage des parties disponibles à l'arrivée d'un nouvel utilisateur
 socket.on('games-available', (gameList) => {
-    console.log('games-available')
     let chooseGameElement = document.querySelector('#choose-game')
 
     gameList.forEach(function (game) {
@@ -34,7 +34,6 @@ socket.on('games-available', (gameList) => {
 
 // Demande de création d'une nouvelle partie au serveur
 document.querySelector('#new-game').addEventListener('click', () => {
-    console.log('new-game-requested')
     socket.emit('new-game-requested')
 })
 
@@ -57,7 +56,6 @@ socket.on('new-game-joined', (game) => {
 
 // Nouvelle partie créée, affichage de la partie dans la liste des parties disponibles
 socket.on('new-game-created', (game) => {
-    console.log('new-game-created: ' + game.number)
     let button = document.querySelector('#join-button-template').cloneNode(true)
     button.removeAttribute('id')
     button.dataset.gameId = game.id
@@ -70,7 +68,6 @@ socket.on('new-game-created', (game) => {
 document.querySelector('#choose-game').addEventListener('click', (e) => {
     if (e.target.classList.contains('join')) {
         let gameId = e.target.dataset.gameId
-        console.log('join-game-requested : ' + gameId)
         socket.emit('join-game-requested', gameId)
     }
 })
@@ -106,7 +103,6 @@ socket.on('game-joined', (game, opponent, amIFirstPlayer) => {
 
 // Partie pleine, retrait de la partie dans la liste des parties disponibles
 socket.on('game-full', (game) => {
-    console.log('game-full: ' + game.number)
     document.querySelectorAll('button.join').forEach((button) => {
         if (button.getAttribute('data-game-id') === game.id) {
             button.remove()
@@ -156,7 +152,6 @@ socket.on('game-over', (why) => {
 
 // Partie supprimée : retrait de la liste des parties disponibles
 socket.on('game-deleted', (game) => {
-    console.log('game-deleted: ' + game.number)
     document.querySelectorAll('button.join').forEach((button) => {
         if (button.getAttribute('data-game-id') === game.id) {
             button.remove()

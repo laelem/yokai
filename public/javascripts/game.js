@@ -226,8 +226,6 @@ document.querySelectorAll('.cell').forEach((cell) => {
 
 // Mouvement d'une pièce par un joueur
 socket.on('move-played', (side, pieceId, x, y) => {
-    console.log('move-played', side, pieceId, x, y)
-
     const main = document.querySelector('#main-container')
     const player = main.getAttribute('data-turn')
     const piece = document.getElementById(pieceId)
@@ -248,8 +246,6 @@ socket.on('move-played', (side, pieceId, x, y) => {
 
 // Capture d'une pièce par un joueur
 socket.on('capture-played', (side, pieceId, targetedPieceId) => {
-    console.log('capture-played', pieceId, targetedPieceId)
-
     const main = document.querySelector('#main-container')
     const player = main.getAttribute('data-turn')
 

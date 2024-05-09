@@ -12,7 +12,6 @@ let createNewUser = function () {
     let number = 1
     while(numberList.includes(number)) { number++ }
     let user = new User(number)
-    console.log('new user logged in : ' + user.pseudo);
     data.userList.push(user)
     return user
 }
@@ -23,26 +22,29 @@ let createNewGame = function () {
     let number = 1
     while(numberList.includes(number)) { number++ }
     let game = new Game(number)
-    console.log('new-game ' + game.number);
     data.gameList.push(game)
     return game
 }
 
 exports.start = (io) => {
     io.on('connection', (socket) => {
-        let currentUser = createNewUser()
-        socket.emit('user-connected', currentUser)
+        let currentUser = null
 
-        let availableGameList = data.gameList.filter(function (game) { return game.playerList.length === 1 })
-        if (availableGameList.length > 0) {
-            socket.emit('games-available', availableGameList)
-        } else {
-            const game = createNewGame()
-            game.join(currentUser)
-            socket.join(game.id)
-            socket.emit('new-game-joined', game)
-            socket.broadcast.emit('new-game-created', game)
-        }
+        socket.on('logged-in', function() {
+            currentUser = createNewUser()
+            socket.emit('user-connected', currentUser)
+
+            let availableGameList = data.gameList.filter(function (game) { return game.playerList.length === 1 })
+            if (availableGameList.length > 0) {
+                socket.emit('games-available', availableGameList)
+            } else {
+                const game = createNewGame()
+                game.join(currentUser)
+                socket.join(game.id)
+                socket.emit('new-game-joined', game)
+                socket.broadcast.emit('new-game-created', game)
+            }
+        })
 
         socket.on('new-game-requested', function() {
             const game = createNewGame()
@@ -55,7 +57,6 @@ exports.start = (io) => {
         socket.on('join-game-requested', function(gameId) {
             const game = data.gameList.find((game) => game.id === gameId)
             game.join(currentUser)
-            console.log('join-game ' + game.number);
             socket.join(game.id)
             game.start()
             const amIFirstPlayer = currentUser === game.firstPlayer
@@ -65,7 +66,7 @@ exports.start = (io) => {
         })
 
         socket.on('disconnecting', function () {
-            console.log('disconnecting user ' + currentUser.pseudo)
+            if (!currentUser) { return }
 
             // suppression de l'utilisateur
             const userIndex = data.userList.findIndex((user) => user.id === currentUser.id)
@@ -77,7 +78,6 @@ exports.start = (io) => {
                 const game = data.gameList.find((game) => game.id === room)
                 if (!game) { return } // il s'agit de la room par défaut de l'utilisateur
                 game.quit(currentUser)
-                console.log('user disconnected from game : ' + room)
 
                 // suppression de la partie
                 const gameIndex = data.gameList.findIndex((game) => game.id === room)
@@ -95,8 +95,6 @@ exports.start = (io) => {
         })
 
         socket.on('move-requested', function (gameId, pieceId, x, y) {
-            console.log('piece selected : ' + pieceId)
-
             const game = data.gameList.find((game) => game.id === gameId)
 
             if (currentUser !== game.turnPlayer) {
@@ -122,9 +120,6 @@ exports.start = (io) => {
         })
 
         socket.on('capture-requested', function (gameId, pieceId, targetedPieceId) {
-            console.log('piece selected : ' + pieceId)
-            console.log('piece targeted : ' + targetedPieceId)
-
             const game = data.gameList.find((game) => game.id === gameId)
 
             if (currentUser !== game.turnPlayer) {

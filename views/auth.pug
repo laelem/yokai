@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  #main.container
+    header#header.row.g-0.py-3.border-bottom
+      .col
+        h1.text-center.display-3= __('app.name')
+    form(method="POST" action="/")
+      .row.mt-4.g-3.justify-content-center
+        .col-auto
+          label.col-form-label(for='password') Mot de passe
+        .col-auto
+          input#password(
+            type='password'
+            name='password'
+            aria-describedby='validationServerPasswordFeedback'
+            class='form-control' + (state === 'invalid' ? ' is-invalid' : '')
+          )
+          .invalid-feedback(id='validationServerPasswordFeedback') Mot de passe incorrect.
+        .col-auto
+          button.btn.btn-primary(type='submit') Valider
